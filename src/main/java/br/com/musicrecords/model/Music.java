@@ -3,6 +3,7 @@ package br.com.musicrecords.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -21,7 +22,9 @@ public class Music implements Serializable {
   @Id
   @GeneratedValue
   private Long id;
+  @Column(length = 50)
   private String title;
+  @Column(length = 50)
   private String artist;
   private LocalDate launchDate;
   private LocalTime duration;
