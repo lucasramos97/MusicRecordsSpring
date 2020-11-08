@@ -5,3 +5,4 @@ INSERT INTO music (id, artist, duration, feat, launch_date, title, views_number)
 INSERT INTO music (id, artist, duration, feat, launch_date, title, views_number) VALUES (3, 'Eminem ft. Dido', '00:08:09', 1, '2000-11-21', 'Stan', 337400903);
 INSERT INTO music (id, artist, duration, feat, launch_date, title, views_number) VALUES (4, 'Eminem', '00:05:23', 0, '2002-10-22', 'Lose Yourself', 951091416);
 INSERT INTO music (id, artist, duration, feat, launch_date, title, views_number) VALUES (5, 'Eminem ft. Rihanna', '00:05:19', 1, '2013-10-29', 'The Monster', 727775862);
+INSERT INTO hibernate_sequence (next_val) VALUES (6);
