@@ -1,7 +1,8 @@
 package br.com.musicrecords.controller;
 
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import br.com.musicrecords.model.Music;
 import br.com.musicrecords.repository.MusicRepository;
@@ -23,8 +25,8 @@ public class MusicController {
   private MusicRepository musicRepository;
 
   @GetMapping
-  public List<Music> getMusics() {
-    return musicRepository.findAll(Sort.by("artist", "title"));
+  public Page<Music> getMusics(@RequestParam(defaultValue = "0") int page) {
+    return musicRepository.findAll(PageRequest.of(page, 5, Sort.by("artist", "title")));
   }
 
   @PostMapping
