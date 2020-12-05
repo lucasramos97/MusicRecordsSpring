@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,5 +31,7 @@ public class Music implements Serializable {
   private LocalTime duration;
   private Long viewsNumber;
   private boolean feat;
+  @JsonIgnore
+  private boolean deleted;
 
 }

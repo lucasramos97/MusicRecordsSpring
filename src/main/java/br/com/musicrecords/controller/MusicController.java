@@ -7,7 +7,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +29,8 @@ public class MusicController {
 
   @GetMapping
   public Page<Music> getMusics(@RequestParam(defaultValue = "0") int page) {
-    return musicRepository.findAll(PageRequest.of(page, 5, Sort.by("artist", "title")));
+    return this.musicRepository
+        .findAllByDeletedIsFalse(PageRequest.of(page, 5, Sort.by("artist", "title")));
   }
 
   @PostMapping
@@ -43,6 +46,18 @@ public class MusicController {
   @PutMapping
   public ResponseEntity<Music> edit(@RequestBody Music music) {
     try {
+      this.musicRepository.save(music);
+      return new ResponseEntity<>(HttpStatus.OK);
+    } catch (Exception e) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @DeleteMapping("/{musicId}")
+  public ResponseEntity<Music> delete(@PathVariable Long musicId) {
+    try {
+      Music music = this.musicRepository.findById(musicId).get();
+      music.setDeleted(true);
       this.musicRepository.save(music);
       return new ResponseEntity<>(HttpStatus.OK);
     } catch (Exception e) {
