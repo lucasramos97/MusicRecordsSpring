@@ -6,28 +6,34 @@ import java.time.LocalTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 public class Music implements Serializable {
 
   private static final long serialVersionUID = 8557374919268342896L;
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  @Column(length = 50)
+  @NotBlank(message = "Title is required!")
+  @Column(nullable = false, length = 50)
   private String title;
-  @Column(length = 50)
+  @NotBlank(message = "Artist is required!")
+  @Column(nullable = false, length = 50)
   private String artist;
+  @NotBlank(message = "Launch Date is required!")
+  @Column(nullable = false)
   private LocalDate launchDate;
+  @NotBlank(message = "Duration is required!")
+  @Column(nullable = false)
   private LocalTime duration;
   private Long viewsNumber;
   private boolean feat;

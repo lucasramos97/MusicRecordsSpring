@@ -1,5 +1,6 @@
 package br.com.musicrecords.controller;
 
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import br.com.musicrecords.model.MessageResponse;
 import br.com.musicrecords.model.Music;
 import br.com.musicrecords.repository.MusicRepository;
 
@@ -34,7 +36,7 @@ public class MusicController {
   }
 
   @PostMapping
-  public ResponseEntity<Music> save(@RequestBody Music music) {
+  public ResponseEntity<MessageResponse> save(@Valid @RequestBody Music music) {
     try {
       this.musicRepository.save(music);
       return new ResponseEntity<>(HttpStatus.CREATED);
@@ -44,7 +46,7 @@ public class MusicController {
   }
 
   @PutMapping
-  public ResponseEntity<Music> edit(@RequestBody Music music) {
+  public ResponseEntity<MessageResponse> edit(@Valid @RequestBody Music music) {
     try {
       this.musicRepository.save(music);
       return new ResponseEntity<>(HttpStatus.OK);
@@ -54,7 +56,7 @@ public class MusicController {
   }
 
   @DeleteMapping("/{musicId}")
-  public ResponseEntity<Music> delete(@PathVariable Long musicId) {
+  public ResponseEntity<MessageResponse> delete(@PathVariable Long musicId) {
     try {
       Music music = this.musicRepository.findById(musicId).get();
       music.setDeleted(true);
