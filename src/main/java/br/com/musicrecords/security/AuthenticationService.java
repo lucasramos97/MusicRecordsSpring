@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,6 @@ public class AuthenticationService {
     Authentication authentication =
         new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword());
     this.authenticationManager.authenticate(authentication);
-
   }
 
   public Authentication getAuthentication(UserDetails userDetails, HttpServletRequest request) {
@@ -29,6 +29,16 @@ public class AuthenticationService {
     usernamePasswordAuthenticationToken
         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
     return usernamePasswordAuthenticationToken;
+  }
+
+  public String getAuthenticationUserName() {
+    try {
+      UserDetails userDetails =
+          (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+      return userDetails.getUsername();
+    } catch (Exception e) {
+      return "";
+    }
   }
 
 }

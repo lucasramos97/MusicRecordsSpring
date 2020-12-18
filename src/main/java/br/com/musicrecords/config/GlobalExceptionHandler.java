@@ -1,5 +1,6 @@
 package br.com.musicrecords.config;
 
+import javax.validation.UnexpectedTypeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -39,6 +40,21 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
   public ResponseEntity<MessageResponse> handlerHttpRequestMethodNotSupportedException() {
     return new ResponseEntity<>(new MessageResponse("URI not found!"), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(UnexpectedTypeException.class)
+  public ResponseEntity<MessageResponse> handlerUnexpectedTypeException(
+      UnexpectedTypeException exception) {
+    try {
+      String[] exceptionSplit = exception.getMessage().split("'");
+      String type = exceptionSplit[3];
+      String value = exceptionSplit[5];
+      String errorMessage =
+          String.format("It was not possible convert the value of %s to type %s", value, type);
+      return new ResponseEntity<>(new MessageResponse(errorMessage), HttpStatus.BAD_REQUEST);
+    } catch (Exception e) {
+      return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
   }
 
 }

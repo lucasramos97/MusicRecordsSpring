@@ -1,5 +1,6 @@
 package br.com.musicrecords.controller;
 
+import java.util.Optional;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import br.com.musicrecords.model.MessageResponse;
 import br.com.musicrecords.model.Music;
+import br.com.musicrecords.model.User;
 import br.com.musicrecords.repository.MusicRepository;
+import br.com.musicrecords.repository.UserRepository;
+import br.com.musicrecords.security.AuthenticationService;
 
 @CrossOrigin
 @RestController
@@ -29,15 +33,29 @@ public class MusicController {
   @Autowired
   private MusicRepository musicRepository;
 
+  @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
+  private AuthenticationService authenticationService;
+
   @GetMapping
   public Page<Music> getMusics(@RequestParam(defaultValue = "0") int page) {
-    return this.musicRepository
-        .findAllByDeletedIsFalse(PageRequest.of(page, 5, Sort.by("artist", "title")));
+    String authenticationUserName = this.authenticationService.getAuthenticationUserName();
+    return this.musicRepository.findAllByUserEmailAndDeletedIsFalse(authenticationUserName,
+        PageRequest.of(page, 5, Sort.by("artist", "title")));
   }
 
   @PostMapping
   public ResponseEntity<MessageResponse> save(@Valid @RequestBody Music music) {
     try {
+      String authenticationUserName = this.authenticationService.getAuthenticationUserName();
+      Optional<User> maybeUser = this.userRepository.findByEmail(authenticationUserName);
+      if (!maybeUser.isPresent()) {
+        String message = String.format("User not found by 'Email' $s!", authenticationUserName);
+        return new ResponseEntity<>(new MessageResponse(message), HttpStatus.BAD_REQUEST);
+      }
+      music.setUser(maybeUser.get());
       this.musicRepository.save(music);
       return new ResponseEntity<>(HttpStatus.CREATED);
     } catch (Exception e) {

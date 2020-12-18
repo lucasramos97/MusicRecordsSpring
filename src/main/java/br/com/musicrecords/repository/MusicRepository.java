@@ -9,6 +9,6 @@ import br.com.musicrecords.model.Music;
 @Repository
 public interface MusicRepository extends JpaRepository<Music, Long> {
 
-  public Page<Music> findAllByDeletedIsFalse(Pageable pageable);
+  public Page<Music> findAllByUserEmailAndDeletedIsFalse(String email, Pageable pageable);
 
 }
