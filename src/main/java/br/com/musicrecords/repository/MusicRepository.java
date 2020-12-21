@@ -11,4 +11,8 @@ public interface MusicRepository extends JpaRepository<Music, Long> {
 
   public Page<Music> findAllByUserEmailAndDeletedIsFalse(String email, Pageable pageable);
 
+  public Page<Music> findAllByUserEmailAndDeletedIsTrue(String email, Pageable pageable);
+
+  public long countByUserEmailAndDeletedIsTrue(String email);
+
 }
