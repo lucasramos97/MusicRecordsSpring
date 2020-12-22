@@ -27,8 +27,6 @@ public class MusicService {
 
   public Music save(Music music) {
     this.beforePersist(music);
-    User user = this.userService.getUserIfExistsByAuthenticationUserName();
-    music.setUser(user);
     return this.musicRepository.save(music);
   }
 
@@ -39,11 +37,6 @@ public class MusicService {
       music.setUser(user);
     });
     return this.musicRepository.saveAll(musics);
-  }
-
-  public Music edit(Music music) {
-    this.beforePersist(music);
-    return this.musicRepository.save(music);
   }
 
   public Music delete(Long musicId) {
@@ -84,6 +77,8 @@ public class MusicService {
     String launchDate = StringUtils.leaveOnlyNumbers(music.getLaunchDate());
     ValidatorUtils.validLaunchDate(launchDate);
     music.setLaunchDate(launchDate);
+    User user = this.userService.getUserIfExistsByAuthenticationUserName();
+    music.setUser(user);
   }
 
 }

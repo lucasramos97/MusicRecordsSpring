@@ -46,7 +46,7 @@ public class MusicController {
   @PutMapping
   public ResponseEntity<MessageResponse> edit(@Valid @RequestBody Music music) {
     try {
-      this.musicService.edit(music);
+      this.musicService.save(music);
       return new ResponseEntity<>(HttpStatus.OK);
     } catch (RuntimeException e) {
       return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
