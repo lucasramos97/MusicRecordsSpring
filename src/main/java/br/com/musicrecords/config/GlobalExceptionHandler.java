@@ -3,6 +3,7 @@ package br.com.musicrecords.config;
 import javax.validation.UnexpectedTypeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,6 +14,12 @@ import io.jsonwebtoken.SignatureException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  @ExceptionHandler(UsernameNotFoundException.class)
+  public ResponseEntity<MessageResponse> handlerUsernameNotFoundException(
+      UsernameNotFoundException e) {
+    return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+  }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<MessageResponse> handlerIllegalArgumentException() {

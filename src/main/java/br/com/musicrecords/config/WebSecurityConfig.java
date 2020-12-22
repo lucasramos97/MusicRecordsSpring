@@ -13,9 +13,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import br.com.musicrecords.filter.AuthenticationRequestFilter;
 import br.com.musicrecords.security.AuthenticationEntryPoint;
-import br.com.musicrecords.security.UserDetailService;
+import br.com.musicrecords.security.AuthenticationRequestFilter;
+import br.com.musicrecords.service.UserDetailService;
 
 @Configuration
 @EnableWebSecurity

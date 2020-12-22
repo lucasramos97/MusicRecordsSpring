@@ -1,4 +1,4 @@
-package br.com.musicrecords.filter;
+package br.com.musicrecords.security;
 
 import java.io.IOException;
 import javax.servlet.FilterChain;
@@ -10,12 +10,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import br.com.musicrecords.security.AuthenticationService;
-import br.com.musicrecords.security.JwtTokenService;
-import br.com.musicrecords.security.UserDetailService;
+import br.com.musicrecords.service.AuthenticationService;
+import br.com.musicrecords.service.JwtTokenService;
+import br.com.musicrecords.service.UserDetailService;
 
 @Component
 public class AuthenticationRequestFilter extends OncePerRequestFilter {
@@ -24,7 +25,7 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter {
   private UserDetailService userDetailService;
 
   @Autowired
-  private JwtTokenService jwtTokenUtil;
+  private JwtTokenService jwtTokenService;
 
   @Autowired
   private AuthenticationService authenticationService;
@@ -46,7 +47,7 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter {
     if (requestHeader != null && requestHeader.startsWith("Bearer ")) {
       token = requestHeader.substring(7);
       try {
-        email = jwtTokenUtil.getUsernameFromToken(token);
+        email = jwtTokenService.getUsernameFromToken(token);
       } catch (RuntimeException e) {
         isNotError = false;
         this.handlerExceptionResolver.resolveException(request, response, null, e);
@@ -55,14 +56,21 @@ public class AuthenticationRequestFilter extends OncePerRequestFilter {
 
     if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-      UserDetails userDetails = this.userDetailService.loadUserByUsername(email);
+      UserDetails userDetails = null;
 
-      if (jwtTokenUtil.validateToken(token, userDetails)) {
+      try {
+        userDetails = this.userDetailService.loadUserByUsername(email);
+      } catch (UsernameNotFoundException e) {
+        this.handlerExceptionResolver.resolveException(request, response, null, e);
+        return;
+      }
 
+      if (jwtTokenService.validateToken(token, userDetails)) {
         Authentication authentication =
             this.authenticationService.getAuthentication(userDetails, request);
         SecurityContextHolder.getContext().setAuthentication(authentication);
       }
+
     }
 
     if (isNotError) {
