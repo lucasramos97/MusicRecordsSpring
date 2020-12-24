@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.musicrecords.model.MessageResponse;
 import br.com.musicrecords.model.Music;
 import br.com.musicrecords.service.MusicService;
+import io.swagger.annotations.Api;
 
+@Api(tags = "Music")
 @CrossOrigin
 @RestController
 @RequestMapping("/musics")

@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.musicrecords.model.MessageResponse;
 import br.com.musicrecords.model.User;
 import br.com.musicrecords.service.AuthService;
+import io.swagger.annotations.Api;
 
+@Api(tags = "Auth")
 @CrossOrigin
 @RestController
 @RequestMapping("/auth")

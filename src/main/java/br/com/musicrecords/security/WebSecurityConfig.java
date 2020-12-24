@@ -1,4 +1,4 @@
-package br.com.musicrecords.config;
+package br.com.musicrecords.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +13,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import br.com.musicrecords.security.AuthenticationEntryPoint;
-import br.com.musicrecords.security.AuthenticationRequestFilter;
 import br.com.musicrecords.service.UserDetailService;
 
 @Configuration
@@ -50,9 +48,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity httpSecurity) throws Exception {
     httpSecurity.cors().and().csrf().disable().authorizeRequests()
-        .antMatchers("/auth/login", "/auth/create").permitAll().anyRequest().authenticated().and()
-        .exceptionHandling().authenticationEntryPoint(this.authenticationEntryPoint).and()
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        .antMatchers("/auth/login", "/auth/create", "/v2/api-docs", "/configuration/ui",
+            "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**")
+        .permitAll().anyRequest().authenticated().and().exceptionHandling()
+        .authenticationEntryPoint(this.authenticationEntryPoint).and().sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     httpSecurity.addFilterBefore(this.authenticationRequestFilter,
         UsernamePasswordAuthenticationFilter.class);
   }
