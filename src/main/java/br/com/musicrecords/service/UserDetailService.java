@@ -16,6 +16,10 @@ public class UserDetailService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String email) {
     User user = this.userService.getUserIfExistsByEmail(email);
+    return this.createUserDetails(user);
+  }
+
+  public UserDetails createUserDetails(User user) {
     return new org.springframework.security.core.userdetails.User(user.getEmail(),
         user.getPassword(), new ArrayList<>());
   }

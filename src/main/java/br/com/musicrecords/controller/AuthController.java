@@ -25,8 +25,8 @@ public class AuthController {
   @PostMapping("/login")
   public ResponseEntity<MessageResponse> login(@RequestBody User user) {
     try {
-      String token = this.authService.login(user);
-      return new ResponseEntity<>(new MessageResponse(token), HttpStatus.OK);
+      MessageResponse messageResponse = this.authService.login(user);
+      return new ResponseEntity<>(messageResponse, HttpStatus.OK);
     } catch (RuntimeException e) {
       return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.UNAUTHORIZED);
     }

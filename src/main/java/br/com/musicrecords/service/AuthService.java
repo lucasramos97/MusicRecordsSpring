@@ -7,6 +7,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import br.com.musicrecords.model.MessageResponse;
 import br.com.musicrecords.model.User;
 
 @Service
@@ -27,11 +28,15 @@ public class AuthService {
   @Autowired
   private UserService userService;
 
-  public String login(User user) {
+  public MessageResponse login(User user) {
     try {
       this.authenticationService.authenticate(user);
-      UserDetails userDetails = this.userDetailService.loadUserByUsername(user.getEmail());
-      return jwtTokenService.generateToken(userDetails);
+      User dbUser = this.userService.getUserIfExistsByEmail(user.getEmail());
+      UserDetails userDetails = this.userDetailService.createUserDetails(dbUser);
+      String token = jwtTokenService.generateToken(userDetails);
+      MessageResponse messageResponse = new MessageResponse(token);
+      messageResponse.setUsername(dbUser.getName());
+      return messageResponse;
     } catch (DisabledException e) {
       throw new DisabledException("Disabled user!", e);
     } catch (BadCredentialsException e) {
