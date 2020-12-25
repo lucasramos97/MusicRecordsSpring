@@ -25,7 +25,7 @@ public class SwaggerConfig {
   @Bean
   public Docket api() {
     return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo())
-        .securityContexts(securityContext()).securitySchemes(Arrays.asList(apiKey())).select()
+        .securityContexts(securityContext()).securitySchemes(apiKey()).select()
         .apis(RequestHandlerSelectors.basePackage("br.com.musicrecords.controller"))
         .paths(PathSelectors.any()).build();
   }
@@ -37,11 +37,8 @@ public class SwaggerConfig {
   }
 
   private List<SecurityContext> securityContext() {
-    SecurityContext authSecurityContext = SecurityContext.builder()
-        .securityReferences(defaultAuth()).forPaths(PathSelectors.ant("/auth/test")).build();
-    SecurityContext musicSecurityContext = SecurityContext.builder()
-        .securityReferences(defaultAuth()).forPaths(PathSelectors.ant("/musics/**")).build();
-    return Arrays.asList(authSecurityContext, musicSecurityContext);
+    return Arrays.asList(SecurityContext.builder().securityReferences(defaultAuth())
+        .forPaths(PathSelectors.ant("/musics/**")).build());
   }
 
   private List<SecurityReference> defaultAuth() {
@@ -51,8 +48,8 @@ public class SwaggerConfig {
     return Arrays.asList(new SecurityReference("Token JWT", authorizationScopes));
   }
 
-  private ApiKey apiKey() {
-    return new ApiKey("Token JWT", HttpHeaders.AUTHORIZATION, In.HEADER.name());
+  private List<ApiKey> apiKey() {
+    return Arrays.asList(new ApiKey("Token JWT", HttpHeaders.AUTHORIZATION, In.HEADER.name()));
   }
 
 }
