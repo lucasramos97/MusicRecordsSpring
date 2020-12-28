@@ -36,8 +36,10 @@ public class Music implements Serializable {
   @Column(nullable = false, length = 5)
   private String duration;
   private Long viewsNumber;
+  @Column(columnDefinition = "boolean default false")
   private boolean feat;
   @JsonIgnore
+  @Column(columnDefinition = "boolean default false")
   private boolean deleted;
   @JsonIgnore
   @ManyToOne(cascade = CascadeType.ALL, optional = false)
