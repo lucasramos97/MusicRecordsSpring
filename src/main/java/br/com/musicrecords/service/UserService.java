@@ -24,7 +24,7 @@ public class UserService {
     String authenticationUserName = this.authenticationService.getAuthenticationUserName();
     Optional<User> maybeUser = this.userRepository.findByEmail(authenticationUserName);
     if (!maybeUser.isPresent()) {
-      String message = String.format("User not found by 'E-Mail' $s!", authenticationUserName);
+      String message = String.format("User not found by 'E-Mail' %s!", authenticationUserName);
       throw new UsernameNotFoundException(message);
     }
     return maybeUser.get();
@@ -33,7 +33,7 @@ public class UserService {
   public User getUserIfExistsByEmail(String email) {
     Optional<User> maybeUser = this.userRepository.findByEmail(email);
     if (!maybeUser.isPresent()) {
-      String message = String.format("User not found by 'E-Mail' $s!", email);
+      String message = String.format("User not found by 'E-Mail' %s!", email);
       throw new UsernameNotFoundException(message);
     }
     return maybeUser.get();
