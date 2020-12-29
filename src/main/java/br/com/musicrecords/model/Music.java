@@ -1,14 +1,16 @@
 package br.com.musicrecords.model;
 
 import java.io.Serializable;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +29,7 @@ public class Music implements Serializable {
   @Column(nullable = false, length = 50)
   private String title;
   @NotBlank(message = "Artist is required!")
-  @Column(nullable = false, length = 50)
+  @Column(nullable = false, length = 100)
   private String artist;
   @NotBlank(message = "Launch Date is required!")
   @Column(nullable = false, length = 8)
@@ -42,7 +44,8 @@ public class Music implements Serializable {
   @Column(columnDefinition = "boolean default false")
   private boolean deleted;
   @JsonIgnore
-  @ManyToOne(cascade = CascadeType.ALL, optional = false)
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private User user;
 
 }
