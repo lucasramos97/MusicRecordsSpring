@@ -1,9 +1,8 @@
 package br.com.musicrecordsspring.controllers;
 
-import java.util.Date;
+import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import br.com.musicrecordsspring.exceptions.FutureDateException;
 import br.com.musicrecordsspring.models.Music;
 import br.com.musicrecordsspring.models.PagedMusic;
 import br.com.musicrecordsspring.services.MusicService;
@@ -32,14 +30,7 @@ public class MusicController {
   @GetMapping
   public PagedMusic getAll(@RequestParam(defaultValue = "1") int page,
       @RequestParam(defaultValue = "5") int size) {
-
-    if (page > 0) {
-      page -= 1;
-    }
-
-    Page<Music> result = musicService.getMusics(page, size);
-
-    return new PagedMusic(result.getContent(), result.getTotalElements());
+    return musicService.getAllMusics(page, size);
   }
 
   @GetMapping("/{id}")
@@ -49,56 +40,43 @@ public class MusicController {
 
   @PostMapping
   public ResponseEntity<Music> post(@Valid @RequestBody Music music) {
-
-    validateFutureDate(music);
-
-    if (music.getNumberViews() == null) {
-      music.setNumberViews(0);
-    }
-
-    if (music.getFeat() == null) {
-      music.setFeat(false);
-    }
-
-    return new ResponseEntity<>(musicService.createOrUpdateMusic(music), HttpStatus.CREATED);
+    return new ResponseEntity<>(musicService.postMusic(music), HttpStatus.CREATED);
   }
 
   @PutMapping("/{id}")
   public Music put(@PathVariable Long id, @Valid @RequestBody Music music) {
-
-    validateFutureDate(music);
-
-    Music dbMusic = musicService.getMusicById(id);
-    dbMusic.setTitle(music.getTitle());
-    dbMusic.setArtist(music.getArtist());
-    dbMusic.setReleaseDate(music.getReleaseDate());
-    dbMusic.setDuration(music.getDuration());
-
-    if (music.getNumberViews() != null) {
-      dbMusic.setNumberViews(music.getNumberViews());
-    }
-
-    if (music.getFeat() != null) {
-      dbMusic.setFeat(music.getFeat());
-    }
-
-    return musicService.createOrUpdateMusic(dbMusic);
+    return musicService.putMusic(id, music);
   }
 
   @DeleteMapping("/{id}")
   public Music delete(@PathVariable Long id) {
-
-    Music music = musicService.getMusicById(id);
-    music.setDeleted(true);
-
-    return musicService.createOrUpdateMusic(music);
+    return musicService.deleteMusic(id);
   }
 
-  private void validateFutureDate(Music music) {
+  @GetMapping("/deleted/count")
+  public Long getCountDeletedMusics() {
+    return musicService.getCountDeletedMusics();
+  }
 
-    if (music.getReleaseDate().compareTo(new Date()) > 0) {
-      throw new FutureDateException("Release Date cannot be future!");
-    }
+  @GetMapping("/deleted")
+  public PagedMusic getAllDeleted(@RequestParam(defaultValue = "1") int page,
+      @RequestParam(defaultValue = "5") int size) {
+    return musicService.getAllDeletedMusics(page, size);
+  }
+
+  @PostMapping("/deleted/restore")
+  public int restoreDeleted(@Valid @RequestBody List<Music> deletedMusics) {
+    return musicService.restoreDeletedMusics(deletedMusics);
+  }
+
+  @DeleteMapping("/empty-list")
+  public int emptyList() {
+    return musicService.emptyListMusic();
+  }
+
+  @DeleteMapping("/definitive/{id}")
+  public void definitiveDelete(@PathVariable Long id) {
+    musicService.definitiveDeleteMusic(id);
   }
 
 }

@@ -22,7 +22,7 @@ import br.com.musicrecordsspring.repositories.MusicRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class GetMusicsTest {
+public class GetDeletedMusicsTest {
 
   @Autowired
   private MockMvc mockMvc;
@@ -38,8 +38,8 @@ public class GetMusicsTest {
 
   @BeforeEach
   public void commit() {
-    musicFactory.createBatch(10, false);
-    musicFactory.create(true);
+    musicFactory.createBatch(10, true);
+    musicFactory.create(false);
   }
 
   @AfterEach
@@ -48,15 +48,16 @@ public class GetMusicsTest {
   }
 
   @Test
-  public void getMusicsWithDefaultQueryParams() throws Exception {
+  public void getDeletedMusicsWithDefaultQueryParams() throws Exception {
 
-    MockHttpServletResponse response = mockMvc.perform(get("/musics")).andReturn().getResponse();
+    MockHttpServletResponse response =
+        mockMvc.perform(get("/musics/deleted")).andReturn().getResponse();
 
     PagedMusic responseMusics =
         objectMapper.readValue(response.getContentAsString(), PagedMusic.class);
     String responseContent = objectMapper.writeValueAsString(responseMusics.getContent());
 
-    List<Music> dbMusics = musicRepository.findAllByDeleted(false, Sort.by("artist", "title"));
+    List<Music> dbMusics = musicRepository.findAllByDeleted(true, Sort.by("artist", "title"));
     String dbContent =
         objectMapper.writeValueAsString(Arrays.copyOfRange(dbMusics.toArray(), 0, 5));
 
@@ -67,16 +68,17 @@ public class GetMusicsTest {
   }
 
   @Test
-  public void getMusicsWithExplicitQueryParams() throws Exception {
+  public void getDeletedMusicsWithExplicitQueryParams() throws Exception {
 
-    MockHttpServletResponse response = mockMvc
-        .perform(get("/musics").param("page", "2").param("size", "4")).andReturn().getResponse();
+    MockHttpServletResponse response =
+        mockMvc.perform(get("/musics/deleted").param("page", "2").param("size", "4")).andReturn()
+            .getResponse();
 
     PagedMusic responseMusics =
         objectMapper.readValue(response.getContentAsString(), PagedMusic.class);
     String responseContent = objectMapper.writeValueAsString(responseMusics.getContent());
 
-    List<Music> dbMusics = musicRepository.findAllByDeleted(false, Sort.by("artist", "title"));
+    List<Music> dbMusics = musicRepository.findAllByDeleted(true, Sort.by("artist", "title"));
     String dbContent =
         objectMapper.writeValueAsString(Arrays.copyOfRange(dbMusics.toArray(), 4, 8));
 

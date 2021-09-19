@@ -23,11 +23,11 @@ public class MusicFactory {
     faker = new Faker();
   }
 
-  public List<Music> createBatch(int quant) {
+  public List<Music> createBatch(int quant, boolean deleted) {
 
     List<Music> musics = new ArrayList<>();
     for (int i = 0; i < quant; i++) {
-      musics.add(createMusic(false));
+      musics.add(createMusic(deleted));
     }
 
     return musicRepository.saveAll(musics);
