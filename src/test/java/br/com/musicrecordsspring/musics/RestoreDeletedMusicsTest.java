@@ -15,9 +15,12 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import br.com.musicrecordsspring.MusicFactory;
+import br.com.musicrecordsspring.factories.MusicFactory;
+import br.com.musicrecordsspring.factories.UserFactory;
 import br.com.musicrecordsspring.models.Music;
+import br.com.musicrecordsspring.models.User;
 import br.com.musicrecordsspring.repositories.MusicRepository;
+import br.com.musicrecordsspring.repositories.UserRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,18 +38,26 @@ public class RestoreDeletedMusicsTest {
   @Autowired
   private MusicRepository musicRepository;
 
+  @Autowired
+  private UserFactory userFactory;
+
+  @Autowired
+  private UserRepository userRepository;
+
   private List<Music> deletedMusics;
   private List<Music> musics;
 
   @BeforeEach
   public void commit() {
-    deletedMusics = musicFactory.createBatch(10, true);
-    musics = musicFactory.createBatch(10, false);
+
+    User user = userFactory.create();
+    deletedMusics = musicFactory.createBatch(10, true, user);
+    musics = musicFactory.createBatch(10, false, user);
   }
 
   @AfterEach
   public void rollback() {
-    musicRepository.deleteAll();
+    userRepository.deleteAll();
   }
 
   @Test

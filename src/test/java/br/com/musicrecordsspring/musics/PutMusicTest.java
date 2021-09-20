@@ -21,9 +21,11 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import br.com.musicrecordsspring.MusicFactory;
+import br.com.musicrecordsspring.factories.MusicFactory;
+import br.com.musicrecordsspring.factories.UserFactory;
 import br.com.musicrecordsspring.models.Music;
-import br.com.musicrecordsspring.repositories.MusicRepository;
+import br.com.musicrecordsspring.models.User;
+import br.com.musicrecordsspring.repositories.UserRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,7 +41,10 @@ public class PutMusicTest {
   private MusicFactory musicFactory;
 
   @Autowired
-  private MusicRepository musicRepository;
+  private UserFactory userFactory;
+
+  @Autowired
+  private UserRepository userRepository;
 
   private Music music;
   private Music deletedMusic;
@@ -49,8 +54,9 @@ public class PutMusicTest {
   @BeforeEach
   public void commit() {
 
-    music = musicFactory.create(false);
-    deletedMusic = musicFactory.create(true);
+    User user = userFactory.create();
+    music = musicFactory.create(false, user);
+    deletedMusic = musicFactory.create(true, user);
 
     putAllAttributesMusic = new HashMap<>();
     putAllAttributesMusic.put("title", String.format("%s Test", music.getTitle()));
@@ -71,7 +77,7 @@ public class PutMusicTest {
 
   @AfterEach
   public void rollback() {
-    musicRepository.deleteAll();
+    userRepository.deleteAll();
   }
 
   @Test

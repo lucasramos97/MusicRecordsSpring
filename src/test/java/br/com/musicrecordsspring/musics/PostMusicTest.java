@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import br.com.musicrecordsspring.repositories.MusicRepository;
+import br.com.musicrecordsspring.repositories.UserRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -33,7 +33,7 @@ public class PostMusicTest {
   private ObjectMapper objectMapper;
 
   @Autowired
-  private MusicRepository musicRepository;
+  private UserRepository userRepository;
 
   private Map<String, Object> postAllAttributesMusic;
   private Map<String, Object> postMinimalAttributesMusic;
@@ -60,7 +60,7 @@ public class PostMusicTest {
 
   @AfterEach
   public void rollback() {
-    musicRepository.deleteAll();
+    userRepository.deleteAll();
   }
 
   @Test

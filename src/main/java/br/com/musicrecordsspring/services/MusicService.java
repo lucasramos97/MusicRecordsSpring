@@ -13,13 +13,18 @@ import org.springframework.stereotype.Service;
 import br.com.musicrecordsspring.exceptions.FutureDateException;
 import br.com.musicrecordsspring.models.Music;
 import br.com.musicrecordsspring.models.PagedMusic;
+import br.com.musicrecordsspring.models.User;
 import br.com.musicrecordsspring.repositories.MusicRepository;
+import br.com.musicrecordsspring.repositories.UserRepository;
 
 @Service
 public class MusicService {
 
   @Autowired
   private MusicRepository musicRepository;
+
+  @Autowired
+  private UserRepository userRepository;
 
   public PagedMusic getAllMusics(int page, int size) {
     return getMusics(page, size, false);
@@ -40,6 +45,13 @@ public class MusicService {
     if (music.getFeat() == null) {
       music.setFeat(false);
     }
+
+    User user = new User();
+    user.setUsername("test");
+    user.setEmail("test@email.com");
+    user.setPassword("123");
+
+    music.setUser(userRepository.save(user));
 
     return musicRepository.save(music);
   }
