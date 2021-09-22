@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.persistence.EntityNotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
@@ -14,18 +15,21 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.fasterxml.jackson.databind.JsonMappingException.Reference;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import br.com.musicrecordsspring.exceptions.FutureDateException;
+import br.com.musicrecordsspring.exceptions.InvalidCredentialsException;
 
 @ControllerAdvice
 public class MusicRecordsExceptionHandler {
+
+  private static final String MESSAGE_FIELD = "message";
 
   @ExceptionHandler(EntityNotFoundException.class)
   public ResponseEntity<Map<String, String>> entityNotFoundExceptionHandler(
       EntityNotFoundException e) {
 
     Map<String, String> response = new HashMap<>();
-    response.put("message", e.getMessage());
+    response.put(MESSAGE_FIELD, e.getMessage());
 
-    return new ResponseEntity<Map<String, String>>(response, HttpStatus.NOT_FOUND);
+    return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -41,9 +45,9 @@ public class MusicRecordsExceptionHandler {
     }
 
     Map<String, String> response = new HashMap<>();
-    response.put("message", message);
+    response.put(MESSAGE_FIELD, message);
 
-    return new ResponseEntity<Map<String, String>>(response, HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(InvalidFormatException.class)
@@ -66,18 +70,38 @@ public class MusicRecordsExceptionHandler {
     }
 
     Map<String, String> response = new HashMap<>();
-    response.put("message", message);
+    response.put(MESSAGE_FIELD, message);
 
-    return new ResponseEntity<Map<String, String>>(response, HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(FutureDateException.class)
   public ResponseEntity<Map<String, String>> futureDateExceptionHandler(FutureDateException e) {
 
     Map<String, String> response = new HashMap<>();
-    response.put("message", e.getMessage());
+    response.put(MESSAGE_FIELD, e.getMessage());
 
-    return new ResponseEntity<Map<String, String>>(response, HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<Map<String, String>> dataIntegrityViolationExceptionHandler(
+      DataIntegrityViolationException e) {
+
+    Map<String, String> response = new HashMap<>();
+    response.put(MESSAGE_FIELD, e.getMessage());
+
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(InvalidCredentialsException.class)
+  public ResponseEntity<Map<String, String>> invalidCredentialsExceptionHandler(
+      InvalidCredentialsException e) {
+
+    Map<String, String> response = new HashMap<>();
+    response.put(MESSAGE_FIELD, e.getMessage());
+
+    return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
   }
 
 }
