@@ -15,7 +15,7 @@ import br.com.musicrecordsspring.repositories.UserRepository;
 public class UserService {
 
   @Autowired
-  private JwtService jwtTokenUtil;
+  private JwtService jwtService;
 
   @Autowired
   private PasswordEncoder passwordEncoder;
@@ -53,7 +53,7 @@ public class UserService {
           String.format("Password does not match with email: %s!", login.getEmail()));
     }
 
-    String token = jwtTokenUtil.encode(user.getId().toString());
+    String token = jwtService.encode(user.getId().toString());
 
     return new Authenticable(token, user.getUsername(), user.getEmail());
   }
