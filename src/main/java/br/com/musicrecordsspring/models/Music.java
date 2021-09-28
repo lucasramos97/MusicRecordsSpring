@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import br.com.musicrecordsspring.utils.Messages;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,23 +38,23 @@ public class Music implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotBlank(message = "Title is required!")
+  @NotBlank(message = Messages.TITLE_IS_REQUIRED)
   @Column(nullable = false, length = 100)
   private String title;
 
-  @NotBlank(message = "Artist is required!")
+  @NotBlank(message = Messages.ARTIST_IS_REQUIRED)
   @Column(nullable = false, length = 100)
   private String artist;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
   @JsonProperty("release_date")
-  @NotNull(message = "Release Date is required!")
+  @NotNull(message = Messages.RELEASE_DATE_IS_REQUIRED)
   @Temporal(TemporalType.DATE)
   @Column(name = "release_date", nullable = false)
   private Date releaseDate;
 
   @JsonFormat(pattern = "HH:mm:ss")
-  @NotNull(message = "Duration is required!")
+  @NotNull(message = Messages.DURATION_IS_REQUIRED)
   @Temporal(TemporalType.TIME)
   @Column(nullable = false)
   private Date duration;
@@ -69,9 +70,10 @@ public class Music implements Serializable {
   @Column(columnDefinition = "boolean default false")
   private boolean deleted;
 
+  @JsonIgnore
   @ManyToOne
   @OnDelete(action = OnDeleteAction.CASCADE)
-  @JoinColumn(nullable = false)
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.S")
@@ -85,5 +87,37 @@ public class Music implements Serializable {
   @Column(name = "updated_at")
   @LastModifiedDate
   private Date updatedAt;
+
+  @Override
+  public int hashCode() {
+
+    int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+
+    if (this == obj)
+      return true;
+
+    if (obj == null)
+      return false;
+
+    if (getClass() != obj.getClass())
+      return false;
+
+    Music other = (Music) obj;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    } else if (!id.equals(other.id))
+      return false;
+
+    return true;
+  }
 
 }

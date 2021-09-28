@@ -32,5 +32,4 @@ public class JwtService implements Serializable {
   public String decode(String token) {
     return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
   }
-
 }

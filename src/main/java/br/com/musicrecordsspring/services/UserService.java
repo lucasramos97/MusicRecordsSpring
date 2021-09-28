@@ -10,6 +10,7 @@ import br.com.musicrecordsspring.models.Authenticable;
 import br.com.musicrecordsspring.models.Login;
 import br.com.musicrecordsspring.models.User;
 import br.com.musicrecordsspring.repositories.UserRepository;
+import br.com.musicrecordsspring.utils.Messages;
 
 @Service
 public class UserService {
@@ -33,7 +34,7 @@ public class UserService {
     } catch (DataIntegrityViolationException e) {
 
       throw new DataIntegrityViolationException(
-          String.format("The %s e-mail has already been registered!", user.getEmail()));
+          Messages.getEmailAlreadyRegistered(user.getEmail()));
     }
   }
 
@@ -42,20 +43,18 @@ public class UserService {
     Optional<User> optionalUser = userRepository.findUserByEmail(login.getEmail());
 
     if (optionalUser.isEmpty()) {
-      throw new InvalidCredentialsException(
-          String.format("User not found by e-mail: %s!", login.getEmail()));
+      throw new InvalidCredentialsException(Messages.getUserNotFoundByEmail(login.getEmail()));
     }
 
     User user = optionalUser.get();
 
     if (!passwordEncoder.matches(login.getPassword(), user.getPassword())) {
       throw new InvalidCredentialsException(
-          String.format("Password does not match with email: %s!", login.getEmail()));
+          Messages.getPasswordDoesNotMatchWithEmail(login.getEmail()));
     }
 
     String token = jwtService.encode(user.getId().toString());
 
     return new Authenticable(token, user.getUsername(), user.getEmail());
   }
-
 }

@@ -12,45 +12,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import br.com.musicrecordsspring.factories.UserFactory;
-import br.com.musicrecordsspring.models.User;
-import br.com.musicrecordsspring.repositories.UserRepository;
+import br.com.musicrecordsspring.BaseTdd;
+import br.com.musicrecordsspring.utils.Messages;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class LoginTest {
-
-  @Autowired
-  private MockMvc mockMvc;
-
-  @Autowired
-  private ObjectMapper objectMapper;
-
-  @Autowired
-  private UserFactory userFactory;
-
-  @Autowired
-  private UserRepository userRepository;
-
-  private User user;
-  private Map<String, String> userMap;
+class LoginTest extends BaseTdd {
 
   @BeforeEach
   public void commit() {
 
-    user = userFactory.create();
+    user1 = userFactory.create("1");
 
-    userMap = new HashedMap<>();
-    userMap.put("email", user.getEmail());
-    userMap.put("password", "123");
+    allAttributesUser = new HashedMap<>();
+    allAttributesUser.put("email", user1.getEmail());
+    allAttributesUser.put("password", "123");
   }
 
   @AfterEach
@@ -61,38 +38,34 @@ class LoginTest {
   @Test
   void login() throws Exception {
 
-    String jsonRequest = objectMapper.writeValueAsString(userMap);
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
             .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
     assertNotNull(responseMap.get("token"));
     assertNotEquals("", responseMap.get("token"));
-    assertEquals(user.getUsername(), responseMap.get("username"));
-    assertEquals(userMap.get("email"), responseMap.get("email"));
+    assertEquals(user1.getUsername(), responseMap.get("username"));
+    assertEquals(allAttributesUser.get("email"), responseMap.get("email"));
     assertNull(responseMap.get("password"));
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
 
   @ParameterizedTest
-  @CsvSource({"email, E-mail is required!", "password, Password is required!",})
+  @CsvSource({EMAIL_IS_REQUIRED_CSV_SOURCE, PASSWORD_IS_REQUIRED_CSV_SOURCE,})
   void loginWithoutRequiredFields(String field, String expectedMessage) throws Exception {
 
-    userMap.put(field, "");
-    String jsonRequest = objectMapper.writeValueAsString(userMap);
+    allAttributesUser.put(field, "");
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
             .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
     assertEquals(expectedMessage, responseMap.get("message"));
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
@@ -101,36 +74,32 @@ class LoginTest {
   @Test
   void loginWithInvalidEmail() throws Exception {
 
-    userMap.put("email", "test");
-    String jsonRequest = objectMapper.writeValueAsString(userMap);
+    allAttributesUser.put("email", "test");
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
             .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertEquals("E-mail invalid!", responseMap.get("message"));
+    assertEquals(Messages.EMAIL_INVALID, responseMap.get("message"));
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
   @Test
   void loginWithNonexistentEmail() throws Exception {
 
-    userMap.put("email", "test2@email.com");
-    String jsonRequest = objectMapper.writeValueAsString(userMap);
+    allAttributesUser.put("email", "test2@email.com");
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
             .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    String expectedMessage = String.format("User not found by e-mail: %s!", userMap.get("email"));
+    String expectedMessage = Messages.getUserNotFoundByEmail(allAttributesUser.get("email"));
 
     assertEquals(expectedMessage, responseMap.get("message"));
     assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
@@ -139,22 +108,19 @@ class LoginTest {
   @Test
   void loginWithNonMatchingPassword() throws Exception {
 
-    userMap.put("password", "321");
-    String jsonRequest = objectMapper.writeValueAsString(userMap);
+    allAttributesUser.put("password", "321");
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
             .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
     String expectedMessage =
-        String.format("Password does not match with email: %s!", userMap.get("email"));
+        Messages.getPasswordDoesNotMatchWithEmail(allAttributesUser.get("email"));
 
     assertEquals(expectedMessage, responseMap.get("message"));
     assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
   }
-
 }

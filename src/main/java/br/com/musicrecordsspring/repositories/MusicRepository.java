@@ -12,24 +12,32 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import br.com.musicrecordsspring.models.Music;
+import br.com.musicrecordsspring.models.User;
 
 @Repository
 public interface MusicRepository extends JpaRepository<Music, Long> {
 
-  public Page<Music> findAllByDeleted(boolean deleted, Pageable pageable);
+  public Page<Music> findAllByUserAndDeleted(User user, boolean deleted, Pageable pageable);
 
-  public List<Music> findAllByDeleted(boolean deleted, Sort sort);
+  public List<Music> findAllByUserAndDeleted(User user, boolean deleted, Sort sort);
 
-  public Optional<Music> findByIdAndDeleted(Long id, boolean deleted);
+  public List<Music> findAllByUser(User user);
 
-  public Long countByDeletedIsTrue();
+  public Optional<Music> findByIdAndUserAndDeleted(Long id, User user, boolean deleted);
+
+  public Optional<Music> findByIdAndUser(Long id, User user);
+
+  public Long countByUserAndDeleted(User user, boolean deleted);
+
+  public Long countByUser(User user);
 
   @Transactional
   @Modifying
-  @Query("UPDATE Music m SET m.deleted = false WHERE m.id IN :ids")
-  public int restoreDeletedMusics(@Param("ids") List<Long> musicIds);
+  @Query("UPDATE Music m SET m.deleted = false WHERE m.deleted = true AND m.id IN :ids AND m.user = :user")
+  public int restoreDeletedMusicsByUser(@Param("ids") List<Long> musicIds,
+      @Param("user") User user);
 
   @Transactional
-  public int deleteAllByDeletedIsTrue();
+  public int deleteAllByUserAndDeletedIsTrue(User user);
 
 }

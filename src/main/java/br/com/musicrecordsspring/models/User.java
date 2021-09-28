@@ -31,7 +31,7 @@ public class User implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @NotBlank(message = "Username is required!")
+  @NotBlank(message = Messages.USERNAME_IS_REQUIRED)
   @Column(nullable = false, length = 100)
   private String username;
 

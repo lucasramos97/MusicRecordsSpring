@@ -52,5 +52,4 @@ public class MusicFactory {
 
     return music;
   }
-
 }

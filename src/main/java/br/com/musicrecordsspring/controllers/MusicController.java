@@ -65,13 +65,8 @@ public class MusicController {
   }
 
   @PostMapping("/deleted/restore")
-  public int restoreDeleted(@Valid @RequestBody List<Music> deletedMusics) {
+  public int restoreDeleted(@RequestBody List<Music> deletedMusics) throws Exception {
     return musicService.restoreDeletedMusics(deletedMusics);
-  }
-
-  @DeleteMapping("/empty-list")
-  public int emptyList() {
-    return musicService.emptyListMusic();
   }
 
   @DeleteMapping("/definitive/{id}")
@@ -79,4 +74,8 @@ public class MusicController {
     musicService.definitiveDeleteMusic(id);
   }
 
+  @DeleteMapping("/empty-list")
+  public int emptyList() {
+    return musicService.emptyListMusic();
+  }
 }

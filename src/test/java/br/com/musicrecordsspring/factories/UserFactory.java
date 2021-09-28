@@ -15,14 +15,13 @@ public class UserFactory {
   @Autowired
   private UserRepository userRepository;
 
-  public User create() {
+  public User create(String complement) {
 
     User user = new User();
-    user.setUsername("test");
-    user.setEmail("test@email.com");
+    user.setUsername(String.format("test%s", complement));
+    user.setEmail(String.format("test%s@email.com", complement));
     user.setPassword(passwordEncoder.encode("123"));
 
     return userRepository.save(user);
   }
-
 }

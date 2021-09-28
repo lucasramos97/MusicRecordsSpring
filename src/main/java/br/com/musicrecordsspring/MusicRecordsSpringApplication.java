@@ -24,5 +24,4 @@ public class MusicRecordsSpringApplication {
   public void init() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
   }
-
 }

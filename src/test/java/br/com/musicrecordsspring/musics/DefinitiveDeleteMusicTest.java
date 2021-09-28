@@ -5,101 +5,141 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import br.com.musicrecordsspring.factories.MusicFactory;
-import br.com.musicrecordsspring.factories.UserFactory;
+import br.com.musicrecordsspring.BaseTdd;
 import br.com.musicrecordsspring.models.Music;
-import br.com.musicrecordsspring.models.User;
-import br.com.musicrecordsspring.repositories.MusicRepository;
-import br.com.musicrecordsspring.repositories.UserRepository;
+import br.com.musicrecordsspring.utils.Messages;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-public class DefinitiveDeleteMusicTest {
+class DefinitiveDeleteMusicTest extends BaseTdd {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @BeforeAll
+  public void commitPerClass() throws Exception {
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    user1 = userFactory.create("1");
+    tokenUser1 = generateToken(user1);
 
-  @Autowired
-  private MusicFactory musicFactory;
-
-  @Autowired
-  private MusicRepository musicRepository;
-
-  @Autowired
-  private UserFactory userFactory;
-
-  @Autowired
-  private UserRepository userRepository;
-
-  private Music deletedMusic;
-  private Music music;
+    user2 = userFactory.create("2");
+    tokenUser2 = generateToken(user2);
+  }
 
   @BeforeEach
-  public void commit() {
+  public void commitPerMethod() throws Exception {
 
-    User user = userFactory.create();
-    deletedMusic = musicFactory.create(true, user);
-    music = musicFactory.create(false, user);
+    deletedMusic = musicFactory.create(true, user1);
+    music = musicFactory.create(false, user1);
   }
 
   @AfterEach
-  public void rollback() {
+  public void rollbackPerMethod() {
+    musicRepository.deleteAll();
+  }
+
+  @AfterAll
+  public void rollbackPerClass() {
     userRepository.deleteAll();
   }
 
   @Test
-  public void definitiveDeleteMusic() throws Exception {
+  void definitiveDeleteMusic() throws Exception {
+
+    MockHttpServletResponse response =
+        mockMvc.perform(delete(String.format("/musics/definitive/%s", deletedMusic.getId()))
+            .header("Authorization", tokenUser1)).andReturn().getResponse();
+
+    Optional<Music> musicUser1 = musicRepository.findById(deletedMusic.getId());
+
+    assertTrue(musicUser1.isEmpty());
+    assertEquals(HttpStatus.OK.value(), response.getStatus());
+  }
+
+  @Test
+  void definitiveDeleteNonexistentMusicById() throws Exception {
+
+    MockHttpServletResponse response = mockMvc
+        .perform(
+            delete(String.format("/musics/definitive/%s", 100)).header("Authorization", tokenUser1))
+        .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(Messages.MUSIC_NOT_FOUND, responseMap.get("message"));
+    assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
+  }
+
+  @Test
+  void definitiveDeleteNonDeletedMusic() throws Exception {
+
+    MockHttpServletResponse response =
+        mockMvc.perform(delete(String.format("/musics/definitive/%s", music.getId()))
+            .header("Authorization", tokenUser1)).andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(Messages.MUSIC_NOT_FOUND, responseMap.get("message"));
+    assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
+  }
+
+  @Test
+  void definitiveDeleteNonexistentMusicByUser() throws Exception {
+
+    MockHttpServletResponse response =
+        mockMvc.perform(delete(String.format("/musics/definitive/%s", deletedMusic.getId()))
+            .header("Authorization", tokenUser2)).andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(Messages.MUSIC_NOT_FOUND, responseMap.get("message"));
+    assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
+  }
+
+  @ParameterizedTest
+  @CsvSource({INVALID_TOKEN_CSV_SOURCE, HEADER_AUTHORIZATION_NOT_PRESENT_CSV_SOURCE,
+      NO_TOKEN_PROVIDED_CSV_SOURCE,})
+  void definitiveDeleteMusicWithInappropriateTokens(String token, String expectedMessage)
+      throws Exception {
+
+    MockHttpServletResponse response =
+        mockMvc.perform(delete(String.format("/musics/definitive/%s", deletedMusic.getId()))
+            .header("Authorization", token)).andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(expectedMessage, responseMap.get("message"));
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
+  }
+
+  @Test
+  void definitiveDeleteMusicWithoutAuthorizationHeader() throws Exception {
 
     MockHttpServletResponse response =
         mockMvc.perform(delete(String.format("/musics/definitive/%s", deletedMusic.getId())))
             .andReturn().getResponse();
 
-    Optional<Music> dbOptionalMusic = musicRepository.findById(deletedMusic.getId());
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertTrue(dbOptionalMusic.isEmpty());
-    assertEquals(HttpStatus.OK.value(), response.getStatus());
+    assertEquals(Messages.HEADER_AUTHORIZATION_NOT_PRESENT, responseMap.get("message"));
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
   }
 
   @Test
-  public void definitiveDeleteNonexistentMusic() throws Exception {
+  void definitiveDeleteMusicWithoutBearerAuthenticationScheme() throws Exception {
 
     MockHttpServletResponse response = mockMvc
-        .perform(delete(String.format("/musics/definitive/%s", 100))).andReturn().getResponse();
+        .perform(delete(String.format("/musics/definitive/%s", deletedMusic.getId()))
+            .header("Authorization", tokenUser1.replace("Bearer", "Token")))
+        .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertEquals("Music not found!", responseMap.get("message"));
-    assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
+    assertEquals(Messages.NO_BEARER_AUTHORIZATION_SCHEME, responseMap.get("message"));
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
   }
-
-  @Test
-  public void definitiveDeleteNondeletedMusic() throws Exception {
-
-    MockHttpServletResponse response =
-        mockMvc.perform(delete(String.format("/musics/definitive/%s", music.getId()))).andReturn()
-            .getResponse();
-
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
-
-    assertEquals("Music not found!", responseMap.get("message"));
-    assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
-  }
-
 }

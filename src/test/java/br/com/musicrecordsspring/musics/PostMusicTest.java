@@ -1,249 +1,280 @@
 package br.com.musicrecordsspring.musics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import br.com.musicrecordsspring.repositories.UserRepository;
+import br.com.musicrecordsspring.BaseTdd;
+import br.com.musicrecordsspring.models.Music;
+import br.com.musicrecordsspring.utils.Messages;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-public class PostMusicTest {
+class PostMusicTest extends BaseTdd {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @BeforeAll
+  public void commitPerClass() throws Exception {
 
-  @Autowired
-  private ObjectMapper objectMapper;
-
-  @Autowired
-  private UserRepository userRepository;
-
-  private Map<String, Object> postAllAttributesMusic;
-  private Map<String, Object> postMinimalAttributesMusic;
-
-  @BeforeEach
-  public void commit() {
-
-    postAllAttributesMusic = new HashMap<>();
-    postAllAttributesMusic.put("title", "Title Test");
-    postAllAttributesMusic.put("artist", "Artist Test");
-    postAllAttributesMusic.put("release_date",
-        new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
-    postAllAttributesMusic.put("duration", new SimpleDateFormat("HH:mm:ss").format(new Date()));
-    postAllAttributesMusic.put("number_views", 1);
-    postAllAttributesMusic.put("feat", true);
-
-    postMinimalAttributesMusic = new HashMap<>();
-    postMinimalAttributesMusic.put("title", "Title Test");
-    postMinimalAttributesMusic.put("artist", "Artist Test");
-    postMinimalAttributesMusic.put("release_date",
-        new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
-    postMinimalAttributesMusic.put("duration", new SimpleDateFormat("HH:mm:ss").format(new Date()));
+    user1 = userFactory.create("1");
+    tokenUser1 = generateToken(user1);
   }
 
-  @AfterEach
+  @BeforeEach
+  public void commitPerMethod() {
+
+    allAttributesMusic = new HashMap<>();
+    allAttributesMusic.put("title", "Title Test");
+    allAttributesMusic.put("artist", "Artist Test");
+    allAttributesMusic.put("release_date", new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+    allAttributesMusic.put("duration", new SimpleDateFormat("HH:mm:ss").format(new Date()));
+    allAttributesMusic.put("number_views", 1);
+    allAttributesMusic.put("feat", true);
+
+    minimalAttributesMusic = new HashMap<>();
+    minimalAttributesMusic.put("title", "Title Test");
+    minimalAttributesMusic.put("artist", "Artist Test");
+    minimalAttributesMusic.put("release_date",
+        new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+    minimalAttributesMusic.put("duration", new SimpleDateFormat("HH:mm:ss").format(new Date()));
+  }
+
+  @AfterAll
   public void rollback() {
     userRepository.deleteAll();
   }
 
   @Test
-  public void postAllAttributesMusic() throws Exception {
+  void postAllAttributesMusic() throws Exception {
 
-    String jsonRequest = objectMapper.writeValueAsString(postAllAttributesMusic);
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesMusic);
 
     MockHttpServletResponse response = mockMvc
-        .perform(post("/musics").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .perform(post("/musics").header("Authorization", tokenUser1)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertEquals(postAllAttributesMusic.get("title"), responseMap.get("title"));
-    assertEquals(postAllAttributesMusic.get("artist"), responseMap.get("artist"));
-    assertEquals(postAllAttributesMusic.get("release_date"), responseMap.get("release_date"));
-    assertEquals(postAllAttributesMusic.get("duration"), responseMap.get("duration"));
-    assertEquals(postAllAttributesMusic.get("number_views"), responseMap.get("number_views"));
-    assertEquals(postAllAttributesMusic.get("feat"), responseMap.get("feat"));
+    Long musicId = Long.valueOf(responseMap.get("id").toString());
+    Music dbMusic = musicRepository.findByIdAndUser(musicId, user1).get();
+    String dbMusicContent = objectMapper.writeValueAsString(dbMusic);
+    Map<String, Object> dbMusicContentMap = convertStringToMap(dbMusicContent);
+
+    boolean validTitle =
+        allEquals(allAttributesMusic.get("title"), dbMusic.getTitle(), responseMap.get("title"));
+
+    boolean validArtist =
+        allEquals(allAttributesMusic.get("artist"), dbMusic.getArtist(), responseMap.get("artist"));
+
+    boolean validReleaseDate = allEquals(allAttributesMusic.get("release_date"),
+        dbMusic.getReleaseDate().toString(), responseMap.get("release_date"));
+
+    boolean validDuration = allEquals(allAttributesMusic.get("duration"),
+        dbMusic.getDuration().toString(), responseMap.get("duration"));
+
+    boolean validNumberViews = allEquals(allAttributesMusic.get("number_views"),
+        dbMusic.getNumberViews(), responseMap.get("number_views"));
+
+    boolean validFeat =
+        allEquals(allAttributesMusic.get("feat"), dbMusic.getFeat(), responseMap.get("feat"));
+
+    assertEquals(dbMusicContentMap.get("id"), responseMap.get("id"));
+    assertTrue(validTitle);
+    assertTrue(validArtist);
+    assertTrue(validReleaseDate);
+    assertTrue(validDuration);
+    assertTrue(validNumberViews);
+    assertTrue(validFeat);
     assertNull(responseMap.get("deleted"));
-    assertNotNull(responseMap.get("created_at"));
-    assertNotNull(responseMap.get("updated_at"));
-    assertEquals(responseMap.get("created_at"), responseMap.get("updated_at"));
+    assertNull(responseMap.get("user"));
+    assertEquals(dbMusicContentMap.get("created_at"), responseMap.get("created_at"));
+    assertEquals(dbMusicContentMap.get("updated_at"), responseMap.get("updated_at"));
+    assertEquals(dbMusicContentMap.get("created_at"), dbMusicContentMap.get("updated_at"));
     assertEquals(HttpStatus.CREATED.value(), response.getStatus());
   }
 
   @Test
-  public void postMinimalAttributesMusic() throws Exception {
+  void postMinimalAttributesMusic() throws Exception {
 
-    String jsonRequest = objectMapper.writeValueAsString(postMinimalAttributesMusic);
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
 
     MockHttpServletResponse response = mockMvc
-        .perform(post("/musics").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .perform(post("/musics").header("Authorization", tokenUser1)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertEquals(postMinimalAttributesMusic.get("title"), responseMap.get("title"));
-    assertEquals(postMinimalAttributesMusic.get("artist"), responseMap.get("artist"));
-    assertEquals(postMinimalAttributesMusic.get("release_date"), responseMap.get("release_date"));
-    assertEquals(postMinimalAttributesMusic.get("duration"), responseMap.get("duration"));
-    assertEquals(0, responseMap.get("number_views"));
-    assertEquals(false, responseMap.get("feat"));
+    Long musicId = Long.valueOf(responseMap.get("id").toString());
+    Music dbMusic = musicRepository.findByIdAndUser(musicId, user1).get();
+    String dbMusicContent = objectMapper.writeValueAsString(dbMusic);
+    Map<String, Object> dbMusicContentMap = convertStringToMap(dbMusicContent);
+
+    boolean validTitle = allEquals(minimalAttributesMusic.get("title"), dbMusic.getTitle(),
+        responseMap.get("title"));
+
+    boolean validArtist = allEquals(minimalAttributesMusic.get("artist"), dbMusic.getArtist(),
+        responseMap.get("artist"));
+
+    boolean validReleaseDate = allEquals(minimalAttributesMusic.get("release_date"),
+        dbMusic.getReleaseDate().toString(), responseMap.get("release_date"));
+
+    boolean validDuration = allEquals(minimalAttributesMusic.get("duration"),
+        dbMusic.getDuration().toString(), responseMap.get("duration"));
+
+    boolean validNumberViews =
+        allEquals(0, dbMusic.getNumberViews(), responseMap.get("number_views"));
+
+    boolean validFeat = allEquals(false, dbMusic.getFeat(), responseMap.get("feat"));
+
+    assertEquals(dbMusicContentMap.get("id"), responseMap.get("id"));
+    assertTrue(validTitle);
+    assertTrue(validArtist);
+    assertTrue(validReleaseDate);
+    assertTrue(validDuration);
+    assertTrue(validNumberViews);
+    assertTrue(validFeat);
     assertNull(responseMap.get("deleted"));
-    assertNotNull(responseMap.get("created_at"));
-    assertNotNull(responseMap.get("updated_at"));
-    assertEquals(responseMap.get("created_at"), responseMap.get("updated_at"));
+    assertNull(responseMap.get("user"));
+    assertEquals(dbMusicContentMap.get("created_at"), responseMap.get("created_at"));
+    assertEquals(dbMusicContentMap.get("updated_at"), responseMap.get("updated_at"));
+    assertEquals(dbMusicContentMap.get("created_at"), dbMusicContentMap.get("updated_at"));
     assertEquals(HttpStatus.CREATED.value(), response.getStatus());
   }
 
-  @Test
-  public void postMusicWithoutTitleField() throws Exception {
+  @ParameterizedTest
+  @CsvSource({TITLE_IS_REQUIRED_CSV_SOURCE, ARTIST_IS_REQUIRED_CSV_SOURCE,
+      RELEASE_DATE_IS_REQUIRED_CSV_SOURCE, DURATION_IS_REQUIRED_CSV_SOURCE,})
+  void postMusicWithoutRequiredFields(String field, String expectedMessage) throws Exception {
 
-    postMinimalAttributesMusic.put("title", "");
-    String jsonRequest = objectMapper.writeValueAsString(postMinimalAttributesMusic);
+    minimalAttributesMusic.put(field, "");
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
 
     MockHttpServletResponse response = mockMvc
-        .perform(post("/musics").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .perform(post("/musics").header("Authorization", tokenUser1)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertEquals("Title is required!", responseMap.get("message"));
+    assertEquals(expectedMessage, responseMap.get("message"));
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
   @Test
-  public void postMusicWithoutArtistField() throws Exception {
-
-    postMinimalAttributesMusic.put("artist", "");
-    String jsonRequest = objectMapper.writeValueAsString(postMinimalAttributesMusic);
-
-    MockHttpServletResponse response = mockMvc
-        .perform(post("/musics").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
-        .andReturn().getResponse();
-
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
-
-    assertEquals("Artist is required!", responseMap.get("message"));
-    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-  }
-
-  @Test
-  public void postMusicWithoutReleaseDateField() throws Exception {
-
-    postMinimalAttributesMusic.put("release_date", "");
-    String jsonRequest = objectMapper.writeValueAsString(postMinimalAttributesMusic);
-
-    MockHttpServletResponse response = mockMvc
-        .perform(post("/musics").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
-        .andReturn().getResponse();
-
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
-
-    assertEquals("Release Date is required!", responseMap.get("message"));
-    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-  }
-
-  @Test
-  public void postMusicWithoutDurationField() throws Exception {
-
-    postMinimalAttributesMusic.put("duration", "");
-    String jsonRequest = objectMapper.writeValueAsString(postMinimalAttributesMusic);
-
-    MockHttpServletResponse response = mockMvc
-        .perform(post("/musics").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
-        .andReturn().getResponse();
-
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
-
-    assertEquals("Duration is required!", responseMap.get("message"));
-    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-  }
-
-  @Test
-  public void postMusicWithReleaseDateFuture() throws Exception {
+  void postMusicWithReleaseDateFuture() throws Exception {
 
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.DAY_OF_YEAR, 1);
-    postMinimalAttributesMusic.put("release_date",
+    minimalAttributesMusic.put("release_date",
         new SimpleDateFormat("yyyy-MM-dd").format(calendar.getTime()));
-    String jsonRequest = objectMapper.writeValueAsString(postMinimalAttributesMusic);
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
 
     MockHttpServletResponse response = mockMvc
-        .perform(post("/musics").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .perform(post("/musics").header("Authorization", tokenUser1)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertEquals("Release Date cannot be future!", responseMap.get("message"));
+    assertEquals(Messages.RELEASE_DATE_CANNOT_BE_FUTURE, responseMap.get("message"));
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
   @Test
-  public void postMusicWrongReleaseDateFormat() throws Exception {
+  void postMusicWrongReleaseDateFormat() throws Exception {
 
-    postMinimalAttributesMusic.put("release_date",
-        postMinimalAttributesMusic.get("release_date").toString().replace("-", "/"));
-    String jsonRequest = objectMapper.writeValueAsString(postMinimalAttributesMusic);
+    minimalAttributesMusic.put("release_date",
+        minimalAttributesMusic.get("release_date").toString().replace("-", "/"));
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
 
     MockHttpServletResponse response = mockMvc
-        .perform(post("/musics").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .perform(post("/musics").header("Authorization", tokenUser1)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertEquals("Wrong Release Date format, try yyyy-MM-dd!", responseMap.get("message"));
+    assertEquals(Messages.WRONG_RELEASE_DATE_FORMAT, responseMap.get("message"));
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
   @Test
-  public void postMusicWrongDurationFormat() throws Exception {
+  void postMusicWrongDurationFormat() throws Exception {
 
-    postMinimalAttributesMusic.put("duration",
-        postMinimalAttributesMusic.get("duration").toString().replace(":", "/"));
-    String jsonRequest = objectMapper.writeValueAsString(postMinimalAttributesMusic);
+    minimalAttributesMusic.put("duration",
+        minimalAttributesMusic.get("duration").toString().replace(":", "/"));
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
+
+    MockHttpServletResponse response = mockMvc
+        .perform(post("/musics").header("Authorization", tokenUser1)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(Messages.WRONG_DURATION_FORMAT, responseMap.get("message"));
+    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+  }
+
+  @ParameterizedTest
+  @CsvSource({INVALID_TOKEN_CSV_SOURCE, HEADER_AUTHORIZATION_NOT_PRESENT_CSV_SOURCE,
+      NO_TOKEN_PROVIDED_CSV_SOURCE,})
+  void postMusicWithInappropriateTokens(String token, String expectedMessage) throws Exception {
+
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
+
+    MockHttpServletResponse response = mockMvc
+        .perform(post("/musics").header("Authorization", token)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(expectedMessage, responseMap.get("message"));
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
+  }
+
+  @Test
+  void postMusicWithoutAuthorizationHeader() throws Exception {
+
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
 
     MockHttpServletResponse response = mockMvc
         .perform(post("/musics").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andReturn().getResponse();
 
-    @SuppressWarnings("unchecked")
-    Map<String, Object> responseMap =
-        objectMapper.readValue(response.getContentAsString(), Map.class);
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertEquals("Wrong Duration format, try HH:mm:ss!", responseMap.get("message"));
-    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+    assertEquals(Messages.HEADER_AUTHORIZATION_NOT_PRESENT, responseMap.get("message"));
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
   }
 
+  @Test
+  void postMusicWithoutBearerAuthenticationScheme() throws Exception {
+
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
+
+    MockHttpServletResponse response = mockMvc
+        .perform(post("/musics").header("Authorization", tokenUser1.replace("Bearer", "Token"))
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(Messages.NO_BEARER_AUTHORIZATION_SCHEME, responseMap.get("message"));
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
+  }
 }

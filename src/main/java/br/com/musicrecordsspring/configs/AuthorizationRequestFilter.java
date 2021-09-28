@@ -9,6 +9,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.musicrecordsspring.models.User;
 import br.com.musicrecordsspring.repositories.UserRepository;
 import br.com.musicrecordsspring.services.JwtService;
+import br.com.musicrecordsspring.utils.Messages;
+import io.jsonwebtoken.MalformedJwtException;
 
 @Component
 public class AuthorizationRequestFilter extends OncePerRequestFilter {
@@ -44,8 +47,8 @@ public class AuthorizationRequestFilter extends OncePerRequestFilter {
 
     String authorizationHeader = request.getHeader("Authorization");
 
-    if (authorizationHeader == null) {
-      sendUnauthorizedResponse(response, "Header Authorization not present!");
+    if (StringUtils.isBlank(authorizationHeader)) {
+      sendUnauthorizedResponse(response, Messages.HEADER_AUTHORIZATION_NOT_PRESENT);
       return;
     }
 
@@ -53,18 +56,26 @@ public class AuthorizationRequestFilter extends OncePerRequestFilter {
     String scheme = schemeAndToken[0];
 
     if (!"Bearer".equals(scheme)) {
-      sendUnauthorizedResponse(response, "No Bearer HTTP authentication scheme!");
+      sendUnauthorizedResponse(response, Messages.NO_BEARER_AUTHORIZATION_SCHEME);
       return;
     }
 
     if (schemeAndToken.length == 1) {
-      sendUnauthorizedResponse(response, "No token provided!");
+      sendUnauthorizedResponse(response, Messages.NO_TOKEN_PROVIDED);
       return;
     }
 
     String token = schemeAndToken[1];
 
-    String payload = jwtService.decode(token);
+    String payload = "";
+
+    try {
+
+      payload = jwtService.decode(token);
+    } catch (MalformedJwtException e) {
+      sendUnauthorizedResponse(response, Messages.INVALID_TOKEN);
+      return;
+    }
 
     Long userId = Long.valueOf(payload);
 
@@ -87,7 +98,7 @@ public class AuthorizationRequestFilter extends OncePerRequestFilter {
       throws IOException {
 
     Map<String, String> messageContent = new HashMap<>();
-    messageContent.put("message", "Header Authorization not present!");
+    messageContent.put("message", message);
 
     PrintWriter out = response.getWriter();
     response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -95,5 +106,4 @@ public class AuthorizationRequestFilter extends OncePerRequestFilter {
     out.print(objectMapper.writeValueAsString(messageContent));
     out.flush();
   }
-
 }

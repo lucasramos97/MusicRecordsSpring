@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonMappingException.Reference;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import br.com.musicrecordsspring.exceptions.FutureDateException;
 import br.com.musicrecordsspring.exceptions.InvalidCredentialsException;
+import br.com.musicrecordsspring.utils.Messages;
 
 @ControllerAdvice
 public class MusicRecordsExceptionHandler {
@@ -61,11 +62,11 @@ public class MusicRecordsExceptionHandler {
       Reference reference = e.getPath().get(0);
 
       if (StringUtils.equals(reference.getFieldName(), "release_date")) {
-        message = "Wrong Release Date format, try yyyy-MM-dd!";
+        message = Messages.WRONG_RELEASE_DATE_FORMAT;
       }
 
       if (StringUtils.equals(reference.getFieldName(), "duration")) {
-        message = "Wrong Duration format, try HH:mm:ss!";
+        message = Messages.WRONG_DURATION_FORMAT;
       }
     }
 
@@ -103,5 +104,4 @@ public class MusicRecordsExceptionHandler {
 
     return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
   }
-
 }

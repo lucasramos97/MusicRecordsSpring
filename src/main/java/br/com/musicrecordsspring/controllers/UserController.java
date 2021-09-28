@@ -29,5 +29,4 @@ public class UserController {
   public Authenticable login(@Valid @RequestBody Login login) {
     return userService.login(login);
   }
-
 }
