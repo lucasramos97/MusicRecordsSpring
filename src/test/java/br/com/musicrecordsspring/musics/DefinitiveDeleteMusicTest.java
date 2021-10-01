@@ -25,9 +25,7 @@ class DefinitiveDeleteMusicTest extends BaseTdd {
 
     user1 = userFactory.create("1");
     tokenUser1 = generateToken(user1);
-
-    user2 = userFactory.create("2");
-    tokenUser2 = generateToken(user2);
+    tokenUser2 = generateToken(userFactory.create("2"));
   }
 
   @BeforeEach
@@ -101,7 +99,7 @@ class DefinitiveDeleteMusicTest extends BaseTdd {
   }
 
   @ParameterizedTest
-  @CsvSource({INVALID_TOKEN_CSV_SOURCE, HEADER_AUTHORIZATION_NOT_PRESENT_CSV_SOURCE,
+  @CsvSource({INVALID_TOKEN_CSV_SOURCE, EMPTY_AUTHORIZATION_HEADER_CSV_SOURCE,
       NO_TOKEN_PROVIDED_CSV_SOURCE,})
   void definitiveDeleteMusicWithInappropriateTokens(String token, String expectedMessage)
       throws Exception {

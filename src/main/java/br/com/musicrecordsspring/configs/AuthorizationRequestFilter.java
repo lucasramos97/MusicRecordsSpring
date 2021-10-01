@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -79,7 +80,14 @@ public class AuthorizationRequestFilter extends OncePerRequestFilter {
 
     Long userId = Long.valueOf(payload);
 
-    User user = userRepository.findById(userId).get();
+    Optional<User> optionalUser = userRepository.findById(userId);
+
+    if (optionalUser.isEmpty()) {
+      sendUnauthorizedResponse(response, Messages.INVALID_TOKEN);
+      return;
+    }
+
+    User user = optionalUser.get();
 
     Authentication authentication =
         new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());

@@ -2,6 +2,8 @@ package br.com.musicrecordsspring.musics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import java.util.Map;
@@ -25,9 +27,7 @@ class DeleteMusicTest extends BaseTdd {
 
     user1 = userFactory.create("1");
     tokenUser1 = generateToken(user1);
-
-    user2 = userFactory.create("2");
-    tokenUser2 = generateToken(user2);
+    tokenUser2 = generateToken(userFactory.create("2"));
   }
 
   @BeforeEach
@@ -68,10 +68,14 @@ class DeleteMusicTest extends BaseTdd {
         dbMusicContentMap.get("created_at"), responseMap.get("created_at"));
 
     assertEquals(dbMusicContent, response.getContentAsString());
+    assertNull(responseMap.get("deleted"));
+    assertNull(responseMap.get("user"));
     assertTrue(dbMusic.isDeleted());
+    assertNotNull(responseMap.get("created_at"));
+    assertNotNull(responseMap.get("updated_at"));
     assertTrue(validCreateAt);
     assertEquals(dbMusicContentMap.get("updated_at"), responseMap.get("updated_at"));
-    assertNotEquals(musicContentMap.get("updated_at"), dbMusicContentMap.get("updated_at"));
+    assertNotEquals(musicContentMap.get("updated_at"), responseMap.get("updated_at"));
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
 
@@ -116,7 +120,7 @@ class DeleteMusicTest extends BaseTdd {
   }
 
   @ParameterizedTest
-  @CsvSource({INVALID_TOKEN_CSV_SOURCE, HEADER_AUTHORIZATION_NOT_PRESENT_CSV_SOURCE,
+  @CsvSource({INVALID_TOKEN_CSV_SOURCE, EMPTY_AUTHORIZATION_HEADER_CSV_SOURCE,
       NO_TOKEN_PROVIDED_CSV_SOURCE,})
   void deleteMusicWithInappropriateTokens(String token, String expectedMessage) throws Exception {
 

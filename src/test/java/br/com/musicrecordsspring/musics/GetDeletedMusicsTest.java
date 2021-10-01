@@ -26,10 +26,8 @@ class GetDeletedMusicsTest extends BaseTdd {
     user1 = userFactory.create("1");
     tokenUser1 = generateToken(user1);
 
-    user2 = userFactory.create("2");
-
     musicFactory.createBatch(10, true, user1);
-    musicFactory.createBatch(10, true, user2);
+    musicFactory.createBatch(10, true, userFactory.create("2"));
     musicFactory.create(false, user1);
   }
 
@@ -87,7 +85,7 @@ class GetDeletedMusicsTest extends BaseTdd {
   }
 
   @ParameterizedTest
-  @CsvSource({INVALID_TOKEN_CSV_SOURCE, HEADER_AUTHORIZATION_NOT_PRESENT_CSV_SOURCE,
+  @CsvSource({INVALID_TOKEN_CSV_SOURCE, EMPTY_AUTHORIZATION_HEADER_CSV_SOURCE,
       NO_TOKEN_PROVIDED_CSV_SOURCE,})
   void getDeletedMusicsWithInappropriateTokens(String token, String expectedMessage)
       throws Exception {

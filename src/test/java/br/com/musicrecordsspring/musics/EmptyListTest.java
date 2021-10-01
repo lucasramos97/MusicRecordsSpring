@@ -56,7 +56,7 @@ class EmptyListTest extends BaseTdd {
   }
 
   @ParameterizedTest
-  @CsvSource({INVALID_TOKEN_CSV_SOURCE, HEADER_AUTHORIZATION_NOT_PRESENT_CSV_SOURCE,
+  @CsvSource({INVALID_TOKEN_CSV_SOURCE, EMPTY_AUTHORIZATION_HEADER_CSV_SOURCE,
       NO_TOKEN_PROVIDED_CSV_SOURCE,})
   void emptyListWithInappropriateTokens(String token, String expectedMessage) throws Exception {
 

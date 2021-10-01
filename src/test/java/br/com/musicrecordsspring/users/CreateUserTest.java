@@ -2,6 +2,7 @@ package br.com.musicrecordsspring.users;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import java.util.HashMap;
@@ -20,12 +21,14 @@ import br.com.musicrecordsspring.utils.Messages;
 
 class CreateUserTest extends BaseTdd {
 
+  private Map<String, String> allAttributesUser;
+
   @BeforeEach
   public void commit() {
 
     allAttributesUser = new HashMap<>();
-    allAttributesUser.put("username", "test1");
-    allAttributesUser.put("email", "test1@email.com");
+    allAttributesUser.put("username", "user1");
+    allAttributesUser.put("email", "user1@email.com");
     allAttributesUser.put("password", "123");
   }
 
@@ -49,19 +52,21 @@ class CreateUserTest extends BaseTdd {
     String dbUserContent = objectMapper.writeValueAsString(dbUser);
     Map<String, Object> dbUserContentMap = convertStringToMap(dbUserContent);
 
-    boolean validUsername = allEquals(allAttributesUser.get("username"), dbUser.getUsername(),
-        responseMap.get("username"));
+    boolean validUsername = allEquals(allAttributesUser.get("username"),
+        dbUserContentMap.get("username"), responseMap.get("username"));
 
-    boolean validEmail =
-        allEquals(allAttributesUser.get("email"), dbUser.getEmail(), responseMap.get("email"));
+    boolean validEmail = allEquals(allAttributesUser.get("email"), dbUserContentMap.get("email"),
+        responseMap.get("email"));
 
     assertTrue(validUsername);
     assertTrue(validEmail);
-    assertNotEquals(allAttributesUser.get("password"), dbUser.getPassword());
-    assertEquals(dbUser.getPassword(), responseMap.get("password"));
+    assertNotEquals(allAttributesUser.get("password"), dbUserContentMap.get("password"));
+    assertNotNull(responseMap.get("created_at"));
+    assertNotNull(responseMap.get("updated_at"));
+    assertEquals(dbUserContentMap.get("password"), responseMap.get("password"));
     assertEquals(dbUserContentMap.get("created_at"), responseMap.get("created_at"));
     assertEquals(dbUserContentMap.get("updated_at"), responseMap.get("updated_at"));
-    assertEquals(dbUserContentMap.get("created_at"), dbUserContentMap.get("updated_at"));
+    assertEquals(responseMap.get("created_at"), responseMap.get("updated_at"));
     assertEquals(HttpStatus.CREATED.value(), response.getStatus());
   }
 

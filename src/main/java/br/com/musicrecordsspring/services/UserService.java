@@ -32,7 +32,6 @@ public class UserService {
 
       return userRepository.save(user);
     } catch (DataIntegrityViolationException e) {
-
       throw new DataIntegrityViolationException(
           Messages.getEmailAlreadyRegistered(user.getEmail()));
     }

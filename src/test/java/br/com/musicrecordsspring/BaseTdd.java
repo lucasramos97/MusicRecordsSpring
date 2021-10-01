@@ -50,7 +50,7 @@ public abstract class BaseTdd {
 
   // Authorization Messages
   protected static final String INVALID_TOKEN_CSV_SOURCE = "Bearer 123, " + Messages.INVALID_TOKEN;
-  protected static final String HEADER_AUTHORIZATION_NOT_PRESENT_CSV_SOURCE =
+  protected static final String EMPTY_AUTHORIZATION_HEADER_CSV_SOURCE =
       "'', " + Messages.HEADER_AUTHORIZATION_NOT_PRESENT;
   protected static final String NO_TOKEN_PROVIDED_CSV_SOURCE =
       "Bearer , " + Messages.NO_TOKEN_PROVIDED;
@@ -87,8 +87,6 @@ public abstract class BaseTdd {
 
   protected List<Music> musics;
   protected List<Music> deletedMusics;
-
-  protected Map<String, String> allAttributesUser;
 
   protected String generateToken(User user) throws Exception {
 

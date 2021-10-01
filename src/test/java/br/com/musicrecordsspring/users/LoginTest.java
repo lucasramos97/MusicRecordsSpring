@@ -20,14 +20,16 @@ import br.com.musicrecordsspring.utils.Messages;
 
 class LoginTest extends BaseTdd {
 
+  private Map<String, String> allAttributesLogin;
+
   @BeforeEach
   public void commit() {
 
     user1 = userFactory.create("1");
 
-    allAttributesUser = new HashedMap<>();
-    allAttributesUser.put("email", user1.getEmail());
-    allAttributesUser.put("password", "123");
+    allAttributesLogin = new HashedMap<>();
+    allAttributesLogin.put("email", user1.getEmail());
+    allAttributesLogin.put("password", "123");
   }
 
   @AfterEach
@@ -38,7 +40,7 @@ class LoginTest extends BaseTdd {
   @Test
   void login() throws Exception {
 
-    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesLogin);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
@@ -49,7 +51,7 @@ class LoginTest extends BaseTdd {
     assertNotNull(responseMap.get("token"));
     assertNotEquals("", responseMap.get("token"));
     assertEquals(user1.getUsername(), responseMap.get("username"));
-    assertEquals(allAttributesUser.get("email"), responseMap.get("email"));
+    assertEquals(allAttributesLogin.get("email"), responseMap.get("email"));
     assertNull(responseMap.get("password"));
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
@@ -58,8 +60,8 @@ class LoginTest extends BaseTdd {
   @CsvSource({EMAIL_IS_REQUIRED_CSV_SOURCE, PASSWORD_IS_REQUIRED_CSV_SOURCE,})
   void loginWithoutRequiredFields(String field, String expectedMessage) throws Exception {
 
-    allAttributesUser.put(field, "");
-    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
+    allAttributesLogin.put(field, "");
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesLogin);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
@@ -74,8 +76,8 @@ class LoginTest extends BaseTdd {
   @Test
   void loginWithInvalidEmail() throws Exception {
 
-    allAttributesUser.put("email", "test");
-    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
+    allAttributesLogin.put("email", "test");
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesLogin);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
@@ -90,8 +92,8 @@ class LoginTest extends BaseTdd {
   @Test
   void loginWithNonexistentEmail() throws Exception {
 
-    allAttributesUser.put("email", "test2@email.com");
-    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
+    allAttributesLogin.put("email", "user2@email.com");
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesLogin);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
@@ -99,7 +101,7 @@ class LoginTest extends BaseTdd {
 
     Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    String expectedMessage = Messages.getUserNotFoundByEmail(allAttributesUser.get("email"));
+    String expectedMessage = Messages.getUserNotFoundByEmail(allAttributesLogin.get("email"));
 
     assertEquals(expectedMessage, responseMap.get("message"));
     assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
@@ -108,8 +110,8 @@ class LoginTest extends BaseTdd {
   @Test
   void loginWithNonMatchingPassword() throws Exception {
 
-    allAttributesUser.put("password", "321");
-    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
+    allAttributesLogin.put("password", "321");
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesLogin);
 
     MockHttpServletResponse response =
         mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
@@ -118,7 +120,7 @@ class LoginTest extends BaseTdd {
     Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
     String expectedMessage =
-        Messages.getPasswordDoesNotMatchWithEmail(allAttributesUser.get("email"));
+        Messages.getPasswordDoesNotMatchWithEmail(allAttributesLogin.get("email"));
 
     assertEquals(expectedMessage, responseMap.get("message"));
     assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());

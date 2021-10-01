@@ -1,6 +1,7 @@
 package br.com.musicrecordsspring.musics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -72,25 +73,24 @@ class PostMusicTest extends BaseTdd {
     String dbMusicContent = objectMapper.writeValueAsString(dbMusic);
     Map<String, Object> dbMusicContentMap = convertStringToMap(dbMusicContent);
 
-    boolean validTitle =
-        allEquals(allAttributesMusic.get("title"), dbMusic.getTitle(), responseMap.get("title"));
+    boolean validTitle = allEquals(allAttributesMusic.get("title"), dbMusicContentMap.get("title"),
+        responseMap.get("title"));
 
-    boolean validArtist =
-        allEquals(allAttributesMusic.get("artist"), dbMusic.getArtist(), responseMap.get("artist"));
+    boolean validArtist = allEquals(allAttributesMusic.get("artist"),
+        dbMusicContentMap.get("artist"), responseMap.get("artist"));
 
     boolean validReleaseDate = allEquals(allAttributesMusic.get("release_date"),
-        dbMusic.getReleaseDate().toString(), responseMap.get("release_date"));
+        dbMusicContentMap.get("release_date"), responseMap.get("release_date"));
 
     boolean validDuration = allEquals(allAttributesMusic.get("duration"),
-        dbMusic.getDuration().toString(), responseMap.get("duration"));
+        dbMusicContentMap.get("duration"), responseMap.get("duration"));
 
     boolean validNumberViews = allEquals(allAttributesMusic.get("number_views"),
-        dbMusic.getNumberViews(), responseMap.get("number_views"));
+        dbMusicContentMap.get("number_views"), responseMap.get("number_views"));
 
-    boolean validFeat =
-        allEquals(allAttributesMusic.get("feat"), dbMusic.getFeat(), responseMap.get("feat"));
+    boolean validFeat = allEquals(allAttributesMusic.get("feat"), dbMusicContentMap.get("feat"),
+        responseMap.get("feat"));
 
-    assertEquals(dbMusicContentMap.get("id"), responseMap.get("id"));
     assertTrue(validTitle);
     assertTrue(validArtist);
     assertTrue(validReleaseDate);
@@ -99,9 +99,11 @@ class PostMusicTest extends BaseTdd {
     assertTrue(validFeat);
     assertNull(responseMap.get("deleted"));
     assertNull(responseMap.get("user"));
+    assertNotNull(responseMap.get("created_at"));
+    assertNotNull(responseMap.get("updated_at"));
     assertEquals(dbMusicContentMap.get("created_at"), responseMap.get("created_at"));
     assertEquals(dbMusicContentMap.get("updated_at"), responseMap.get("updated_at"));
-    assertEquals(dbMusicContentMap.get("created_at"), dbMusicContentMap.get("updated_at"));
+    assertEquals(responseMap.get("created_at"), responseMap.get("updated_at"));
     assertEquals(HttpStatus.CREATED.value(), response.getStatus());
   }
 
@@ -122,24 +124,23 @@ class PostMusicTest extends BaseTdd {
     String dbMusicContent = objectMapper.writeValueAsString(dbMusic);
     Map<String, Object> dbMusicContentMap = convertStringToMap(dbMusicContent);
 
-    boolean validTitle = allEquals(minimalAttributesMusic.get("title"), dbMusic.getTitle(),
-        responseMap.get("title"));
+    boolean validTitle = allEquals(minimalAttributesMusic.get("title"),
+        dbMusicContentMap.get("title"), responseMap.get("title"));
 
-    boolean validArtist = allEquals(minimalAttributesMusic.get("artist"), dbMusic.getArtist(),
-        responseMap.get("artist"));
+    boolean validArtist = allEquals(minimalAttributesMusic.get("artist"),
+        dbMusicContentMap.get("artist"), responseMap.get("artist"));
 
     boolean validReleaseDate = allEquals(minimalAttributesMusic.get("release_date"),
-        dbMusic.getReleaseDate().toString(), responseMap.get("release_date"));
+        dbMusicContentMap.get("release_date"), responseMap.get("release_date"));
 
     boolean validDuration = allEquals(minimalAttributesMusic.get("duration"),
-        dbMusic.getDuration().toString(), responseMap.get("duration"));
+        dbMusicContentMap.get("duration"), responseMap.get("duration"));
 
     boolean validNumberViews =
-        allEquals(0, dbMusic.getNumberViews(), responseMap.get("number_views"));
+        allEquals(0, dbMusicContentMap.get("number_views"), responseMap.get("number_views"));
 
-    boolean validFeat = allEquals(false, dbMusic.getFeat(), responseMap.get("feat"));
+    boolean validFeat = allEquals(false, dbMusicContentMap.get("feat"), responseMap.get("feat"));
 
-    assertEquals(dbMusicContentMap.get("id"), responseMap.get("id"));
     assertTrue(validTitle);
     assertTrue(validArtist);
     assertTrue(validReleaseDate);
@@ -148,9 +149,11 @@ class PostMusicTest extends BaseTdd {
     assertTrue(validFeat);
     assertNull(responseMap.get("deleted"));
     assertNull(responseMap.get("user"));
+    assertNotNull(responseMap.get("created_at"));
+    assertNotNull(responseMap.get("updated_at"));
     assertEquals(dbMusicContentMap.get("created_at"), responseMap.get("created_at"));
     assertEquals(dbMusicContentMap.get("updated_at"), responseMap.get("updated_at"));
-    assertEquals(dbMusicContentMap.get("created_at"), dbMusicContentMap.get("updated_at"));
+    assertEquals(responseMap.get("created_at"), responseMap.get("updated_at"));
     assertEquals(HttpStatus.CREATED.value(), response.getStatus());
   }
 
@@ -230,7 +233,7 @@ class PostMusicTest extends BaseTdd {
   }
 
   @ParameterizedTest
-  @CsvSource({INVALID_TOKEN_CSV_SOURCE, HEADER_AUTHORIZATION_NOT_PRESENT_CSV_SOURCE,
+  @CsvSource({INVALID_TOKEN_CSV_SOURCE, EMPTY_AUTHORIZATION_HEADER_CSV_SOURCE,
       NO_TOKEN_PROVIDED_CSV_SOURCE,})
   void postMusicWithInappropriateTokens(String token, String expectedMessage) throws Exception {
 
