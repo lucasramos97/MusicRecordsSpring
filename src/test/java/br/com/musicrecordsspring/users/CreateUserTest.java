@@ -89,6 +89,22 @@ class CreateUserTest extends BaseTdd {
   }
 
   @Test
+  void createUserWithInvalidEmail() throws Exception {
+
+    allAttributesUser.put("email", "test");
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesUser);
+
+    MockHttpServletResponse response =
+        mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+            .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(Messages.EMAIL_INVALID, responseMap.get("message"));
+    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+  }
+
+  @Test
   void createUserWithExistentEmail() throws Exception {
 
     userFactory.create("1");
