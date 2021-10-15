@@ -1,6 +1,7 @@
 package br.com.musicrecordsspring;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.map.HashedMap;
@@ -22,6 +23,7 @@ import br.com.musicrecordsspring.models.Music;
 import br.com.musicrecordsspring.models.User;
 import br.com.musicrecordsspring.repositories.MusicRepository;
 import br.com.musicrecordsspring.repositories.UserRepository;
+import br.com.musicrecordsspring.services.JwtService;
 import br.com.musicrecordsspring.utils.Messages;
 
 @AutoConfigureMockMvc
@@ -73,6 +75,11 @@ public abstract class BaseTdd {
   @Autowired
   protected UserRepository userRepository;
 
+  @Autowired
+  protected JwtService jwtService;
+
+  protected String expiredToken;
+
   protected User user1;
   protected String tokenUser1;
 
@@ -103,6 +110,16 @@ public abstract class BaseTdd {
     Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
     return String.format("Bearer %s", responseMap.get("token"));
+  }
+
+  protected String generateExpiredToken(User user) throws Exception {
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.add(Calendar.SECOND, -10);
+
+    String token = jwtService.encode(user1.getId().toString(), calendar.getTime());
+
+    return String.format("Bearer %s", token);
   }
 
   @SuppressWarnings("unchecked")

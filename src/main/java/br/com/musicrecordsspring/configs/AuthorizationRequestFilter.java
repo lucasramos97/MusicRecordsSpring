@@ -23,6 +23,7 @@ import br.com.musicrecordsspring.models.User;
 import br.com.musicrecordsspring.repositories.UserRepository;
 import br.com.musicrecordsspring.services.JwtService;
 import br.com.musicrecordsspring.utils.Messages;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 
 @Component
@@ -68,17 +69,20 @@ public class AuthorizationRequestFilter extends OncePerRequestFilter {
 
     String token = schemeAndToken[1];
 
-    String payload = "";
+    String subject = "";
 
     try {
 
-      payload = jwtService.decode(token);
+      subject = jwtService.decodeSubject(token);
+    } catch (ExpiredJwtException e) {
+      sendUnauthorizedResponse(response, Messages.TOKEN_EXPIRED);
+      return;
     } catch (MalformedJwtException e) {
       sendUnauthorizedResponse(response, Messages.INVALID_TOKEN);
       return;
     }
 
-    Long userId = Long.valueOf(payload);
+    Long userId = Long.valueOf(subject);
 
     Optional<User> optionalUser = userRepository.findById(userId);
 

@@ -13,19 +13,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import br.com.musicrecordsspring.BaseTdd;
 import br.com.musicrecordsspring.utils.Messages;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 
 class LoginTest extends BaseTdd {
-
-  @Value("${jwt.secret}")
-  private String jwtSecret;
 
   private Map<String, String> allAttributesLogin;
 
@@ -74,7 +69,7 @@ class LoginTest extends BaseTdd {
     Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
     String token = responseMap.get("token").toString();
-    Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+    Claims claims = jwtService.decode(token);
 
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.DAY_OF_MONTH, 1);

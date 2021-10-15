@@ -30,6 +30,7 @@ class PostMusicTest extends BaseTdd {
 
     user1 = userFactory.create("1");
     tokenUser1 = generateToken(user1);
+    expiredToken = generateExpiredToken(user1);
   }
 
   @BeforeEach
@@ -278,6 +279,22 @@ class PostMusicTest extends BaseTdd {
     Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
     assertEquals(Messages.NO_BEARER_AUTHORIZATION_SCHEME, responseMap.get("message"));
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
+  }
+
+  @Test
+  void postMusicWithExpiredToken() throws Exception {
+
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
+
+    MockHttpServletResponse response = mockMvc
+        .perform(post("/musics").header("Authorization", expiredToken)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(Messages.TOKEN_EXPIRED, responseMap.get("message"));
     assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
   }
 }

@@ -30,6 +30,7 @@ public class Messages {
       "No Bearer HTTP authentication scheme!";
   public static final String NO_TOKEN_PROVIDED = "No token provided!";
   public static final String INVALID_TOKEN = "Invalid token!";
+  public static final String TOKEN_EXPIRED = "Log in again, your token has expired!";
 
   public static String getEmailAlreadyRegistered(String email) {
     return String.format("The %s e-mail has already been registered!", email);

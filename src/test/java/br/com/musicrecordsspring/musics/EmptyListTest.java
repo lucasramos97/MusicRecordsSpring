@@ -23,6 +23,7 @@ class EmptyListTest extends BaseTdd {
 
     user1 = userFactory.create("1");
     tokenUser1 = generateToken(user1);
+    expiredToken = generateExpiredToken(user1);
 
     user2 = userFactory.create("2");
 
@@ -92,6 +93,19 @@ class EmptyListTest extends BaseTdd {
     Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
     assertEquals(Messages.NO_BEARER_AUTHORIZATION_SCHEME, responseMap.get("message"));
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
+  }
+
+  @Test
+  void emptyListWithExpiredToken() throws Exception {
+
+    MockHttpServletResponse response =
+        mockMvc.perform(delete("/musics/empty-list").header("Authorization", expiredToken))
+            .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(Messages.TOKEN_EXPIRED, responseMap.get("message"));
     assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
   }
 }

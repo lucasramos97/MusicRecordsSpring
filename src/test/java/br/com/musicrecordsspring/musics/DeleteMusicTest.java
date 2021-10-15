@@ -28,6 +28,7 @@ class DeleteMusicTest extends BaseTdd {
     user1 = userFactory.create("1");
     tokenUser1 = generateToken(user1);
     tokenUser2 = generateToken(userFactory.create("2"));
+    expiredToken = generateExpiredToken(user1);
   }
 
   @BeforeEach
@@ -156,6 +157,19 @@ class DeleteMusicTest extends BaseTdd {
     Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
     assertEquals(Messages.NO_BEARER_AUTHORIZATION_SCHEME, responseMap.get("message"));
+    assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
+  }
+
+  @Test
+  void deleteMusicWithExpiredToken() throws Exception {
+
+    MockHttpServletResponse response = mockMvc.perform(
+        delete(String.format("/musics/%s", music.getId())).header("Authorization", expiredToken))
+        .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    assertEquals(Messages.TOKEN_EXPIRED, responseMap.get("message"));
     assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatus());
   }
 }

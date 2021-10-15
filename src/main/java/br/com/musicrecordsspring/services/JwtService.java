@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -27,8 +28,20 @@ public class JwtService implements Serializable {
         .compact();
   }
 
-  public String decode(String token) {
+  public String encode(String subject, Date exp) {
+
+    Map<String, Object> claims = new HashMap<>();
+
+    return Jwts.builder().setClaims(claims).setSubject(subject).setExpiration(exp)
+        .signWith(SignatureAlgorithm.HS256, jwtSecret).compact();
+  }
+
+  public String decodeSubject(String token) {
     return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
+  }
+
+  public Claims decode(String token) {
+    return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
   }
 
   private Date getTokenExpirationTime() {
