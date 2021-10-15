@@ -1,24 +1,31 @@
 package br.com.musicrecordsspring.users;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import java.util.Calendar;
 import java.util.Map;
 import org.apache.commons.collections4.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import br.com.musicrecordsspring.BaseTdd;
 import br.com.musicrecordsspring.utils.Messages;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 
 class LoginTest extends BaseTdd {
+
+  @Value("${jwt.secret}")
+  private String jwtSecret;
 
   private Map<String, String> allAttributesLogin;
 
@@ -48,12 +55,34 @@ class LoginTest extends BaseTdd {
 
     Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
 
-    assertNotNull(responseMap.get("token"));
-    assertNotEquals("", responseMap.get("token"));
+    assertTrue(StringUtils.isNotBlank(responseMap.get("token").toString()));
     assertEquals(user1.getUsername(), responseMap.get("username"));
     assertEquals(allAttributesLogin.get("email"), responseMap.get("email"));
     assertNull(responseMap.get("password"));
     assertEquals(HttpStatus.OK.value(), response.getStatus());
+  }
+
+  @Test
+  void tokenLasts24Hours() throws Exception {
+
+    String jsonRequest = objectMapper.writeValueAsString(allAttributesLogin);
+
+    MockHttpServletResponse response =
+        mockMvc.perform(post("/login").contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+            .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    String token = responseMap.get("token").toString();
+    Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+
+    Calendar calendar = Calendar.getInstance();
+    calendar.add(Calendar.DAY_OF_MONTH, 1);
+
+    String expected = String.valueOf(calendar.getTime().getTime()).substring(0, 10);
+    String actual = String.valueOf(claims.getExpiration().getTime()).substring(0, 10);
+
+    assertEquals(expected, actual);
   }
 
   @ParameterizedTest
