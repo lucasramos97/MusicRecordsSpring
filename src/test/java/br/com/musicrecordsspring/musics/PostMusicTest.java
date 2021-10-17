@@ -1,7 +1,6 @@
 package br.com.musicrecordsspring.musics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -94,14 +93,16 @@ class PostMusicTest extends BaseTdd {
 
     assertTrue(validTitle);
     assertTrue(validArtist);
+    assertTrue(matchDate(responseMap.get("release_date").toString()));
     assertTrue(validReleaseDate);
+    assertTrue(matchTime(responseMap.get("duration").toString()));
     assertTrue(validDuration);
     assertTrue(validNumberViews);
     assertTrue(validFeat);
     assertNull(responseMap.get("deleted"));
     assertNull(responseMap.get("user"));
-    assertNotNull(responseMap.get("created_at"));
-    assertNotNull(responseMap.get("updated_at"));
+    assertTrue(matchDateTime(responseMap.get("created_at").toString()));
+    assertTrue(matchDateTime(responseMap.get("updated_at").toString()));
     assertEquals(dbMusicContentMap.get("created_at"), responseMap.get("created_at"));
     assertEquals(dbMusicContentMap.get("updated_at"), responseMap.get("updated_at"));
     assertEquals(responseMap.get("created_at"), responseMap.get("updated_at"));
@@ -144,14 +145,16 @@ class PostMusicTest extends BaseTdd {
 
     assertTrue(validTitle);
     assertTrue(validArtist);
+    assertTrue(matchDate(responseMap.get("release_date").toString()));
     assertTrue(validReleaseDate);
+    assertTrue(matchTime(responseMap.get("duration").toString()));
     assertTrue(validDuration);
     assertTrue(validNumberViews);
     assertTrue(validFeat);
     assertNull(responseMap.get("deleted"));
     assertNull(responseMap.get("user"));
-    assertNotNull(responseMap.get("created_at"));
-    assertNotNull(responseMap.get("updated_at"));
+    assertTrue(matchDateTime(responseMap.get("created_at").toString()));
+    assertTrue(matchDateTime(responseMap.get("updated_at").toString()));
     assertEquals(dbMusicContentMap.get("created_at"), responseMap.get("created_at"));
     assertEquals(dbMusicContentMap.get("updated_at"), responseMap.get("updated_at"));
     assertEquals(responseMap.get("created_at"), responseMap.get("updated_at"));

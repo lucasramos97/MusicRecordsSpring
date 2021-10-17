@@ -2,7 +2,6 @@ package br.com.musicrecordsspring.musics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -69,11 +68,13 @@ class DeleteMusicTest extends BaseTdd {
         dbMusicContentMap.get("created_at"), responseMap.get("created_at"));
 
     assertEquals(dbMusicContent, response.getContentAsString());
+    assertTrue(matchDate(responseMap.get("release_date").toString()));
+    assertTrue(matchTime(responseMap.get("duration").toString()));
     assertNull(responseMap.get("deleted"));
     assertNull(responseMap.get("user"));
     assertTrue(dbMusic.isDeleted());
-    assertNotNull(responseMap.get("created_at"));
-    assertNotNull(responseMap.get("updated_at"));
+    assertTrue(matchDateTime(responseMap.get("created_at").toString()));
+    assertTrue(matchDateTime(responseMap.get("updated_at").toString()));
     assertTrue(validCreateAt);
     assertEquals(dbMusicContentMap.get("updated_at"), responseMap.get("updated_at"));
     assertNotEquals(musicContentMap.get("updated_at"), responseMap.get("updated_at"));

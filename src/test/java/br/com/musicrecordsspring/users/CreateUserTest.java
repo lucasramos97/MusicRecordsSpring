@@ -2,7 +2,6 @@ package br.com.musicrecordsspring.users;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import java.util.HashMap;
@@ -61,8 +60,8 @@ class CreateUserTest extends BaseTdd {
     assertTrue(validUsername);
     assertTrue(validEmail);
     assertNotEquals(allAttributesUser.get("password"), dbUserContentMap.get("password"));
-    assertNotNull(responseMap.get("created_at"));
-    assertNotNull(responseMap.get("updated_at"));
+    assertTrue(matchDateTime(responseMap.get("created_at").toString()));
+    assertTrue(matchDateTime(responseMap.get("updated_at").toString()));
     assertEquals(dbUserContentMap.get("password"), responseMap.get("password"));
     assertEquals(dbUserContentMap.get("created_at"), responseMap.get("created_at"));
     assertEquals(dbUserContentMap.get("updated_at"), responseMap.get("updated_at"));

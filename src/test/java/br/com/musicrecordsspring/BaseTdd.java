@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -151,5 +152,19 @@ public abstract class BaseTdd {
     }
 
     return true;
+  }
+
+  public boolean matchDate(String date) {
+    return Pattern.matches("\\d{4}-\\d{2}-\\d{2}", date);
+  }
+
+
+  public boolean matchTime(String time) {
+    return Pattern.matches("\\d{2}:\\d{2}:\\d{2}", time);
+  }
+
+
+  public boolean matchDateTime(String dateTime) {
+    return Pattern.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}", dateTime);
   }
 }

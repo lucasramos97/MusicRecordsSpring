@@ -1,6 +1,8 @@
 package br.com.musicrecordsspring.musics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
@@ -41,10 +43,18 @@ class GetMusicByIdTest extends BaseTdd {
             get(String.format("/musics/%s", music.getId())).header("Authorization", tokenUser1))
         .andReturn().getResponse();
 
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
     Music dbMusic = musicRepository.findByIdAndUser(music.getId(), user1).get();
     String dbContent = objectMapper.writeValueAsString(dbMusic);
 
     assertEquals(dbContent, response.getContentAsString());
+    assertTrue(matchDate(responseMap.get("release_date").toString()));
+    assertTrue(matchTime(responseMap.get("duration").toString()));
+    assertNull(responseMap.get("deleted"));
+    assertNull(responseMap.get("user"));
+    assertTrue(matchDateTime(responseMap.get("created_at").toString()));
+    assertTrue(matchDateTime(responseMap.get("updated_at").toString()));
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
 
