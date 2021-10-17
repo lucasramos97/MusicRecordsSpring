@@ -4,6 +4,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.TestInstance;
@@ -77,6 +79,11 @@ public abstract class BaseTdd {
 
   @Autowired
   protected JwtService jwtService;
+
+  @PostConstruct
+  public void init() {
+    objectMapper.setTimeZone(TimeZone.getDefault());
+  }
 
   protected String expiredToken;
 
