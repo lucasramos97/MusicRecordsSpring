@@ -309,6 +309,46 @@ class PutMusicTest extends BaseTdd {
     assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
   }
 
+  @Test
+  void putMusicWithInvalidReleaseDate() throws Exception {
+
+    minimalAttributesMusic.put("release_date", "2021-01-32");
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
+
+    MockHttpServletResponse response = mockMvc
+        .perform(put(String.format("/musics/%s", music.getId())).header("Authorization", tokenUser1)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    String expectedMessage =
+        Messages.getInvalidDate(minimalAttributesMusic.get("release_date").toString());
+
+    assertEquals(expectedMessage, responseMap.get("message"));
+    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+  }
+
+  @Test
+  void putMusicWithInvalidDuration() throws Exception {
+
+    minimalAttributesMusic.put("duration", "23:60:59");
+    String jsonRequest = objectMapper.writeValueAsString(minimalAttributesMusic);
+
+    MockHttpServletResponse response = mockMvc
+        .perform(put(String.format("/musics/%s", music.getId())).header("Authorization", tokenUser1)
+            .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
+        .andReturn().getResponse();
+
+    Map<String, Object> responseMap = convertStringToMap(response.getContentAsString());
+
+    String expectedMessage =
+        Messages.getInvalidTime(minimalAttributesMusic.get("duration").toString());
+
+    assertEquals(expectedMessage, responseMap.get("message"));
+    assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
+  }
+
   @ParameterizedTest
   @CsvSource({INVALID_TOKEN_CSV_SOURCE, EMPTY_AUTHORIZATION_HEADER_CSV_SOURCE,
       NO_TOKEN_PROVIDED_CSV_SOURCE,})

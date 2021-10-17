@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.OptBoolean;
 import br.com.musicrecordsspring.utils.Messages;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,14 +47,14 @@ public class Music implements Serializable {
   @Column(nullable = false, length = 100)
   private String artist;
 
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = "yyyy-MM-dd", lenient = OptBoolean.FALSE)
   @JsonProperty("release_date")
   @NotNull(message = Messages.RELEASE_DATE_IS_REQUIRED)
   @Temporal(TemporalType.DATE)
   @Column(name = "release_date", nullable = false)
   private Date releaseDate;
 
-  @JsonFormat(pattern = "HH:mm:ss")
+  @JsonFormat(pattern = "HH:mm:ss", lenient = OptBoolean.FALSE)
   @NotNull(message = Messages.DURATION_IS_REQUIRED)
   @Temporal(TemporalType.TIME)
   @Column(nullable = false)

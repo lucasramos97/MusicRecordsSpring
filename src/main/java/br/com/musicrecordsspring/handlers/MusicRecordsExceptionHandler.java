@@ -2,6 +2,7 @@ package br.com.musicrecordsspring.handlers;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.persistence.EntityNotFoundException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,11 +63,11 @@ public class MusicRecordsExceptionHandler {
       Reference reference = e.getPath().get(0);
 
       if (StringUtils.equals(reference.getFieldName(), "release_date")) {
-        message = Messages.WRONG_RELEASE_DATE_FORMAT;
+        message = getReleaseDateMessage(e.getValue().toString());
       }
 
       if (StringUtils.equals(reference.getFieldName(), "duration")) {
-        message = Messages.WRONG_DURATION_FORMAT;
+        message = getDurationMessage(e.getValue().toString());
       }
     }
 
@@ -103,5 +104,23 @@ public class MusicRecordsExceptionHandler {
     response.put(MESSAGE_FIELD, e.getMessage());
 
     return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+  }
+
+  private String getReleaseDateMessage(String value) {
+
+    if (Pattern.matches("\\d{4}-\\d{2}-\\d{2}", value)) {
+      return Messages.getInvalidDate(value);
+    }
+
+    return Messages.WRONG_RELEASE_DATE_FORMAT;
+  }
+
+  private String getDurationMessage(String value) {
+
+    if (Pattern.matches("\\d{2}:\\d{2}:\\d{2}", value)) {
+      return Messages.getInvalidTime(value);
+    }
+
+    return Messages.WRONG_DURATION_FORMAT;
   }
 }
