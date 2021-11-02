@@ -60,11 +60,11 @@ class RestoreDeletedMusicsTest extends BaseTdd {
             .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andReturn().getResponse();
 
-    Long countDeletedMusicsUser1 = musicRepository.countByUserAndDeleted(user1, false);
+    Long countMusicsUser1 = musicRepository.countByUserAndDeleted(user1, false);
     Long countDeletedMusicsUser2 = musicRepository.countByUserAndDeleted(user2, true);
 
     assertEquals("10", response.getContentAsString());
-    assertEquals(11L, countDeletedMusicsUser1);
+    assertEquals(11L, countMusicsUser1);
     assertEquals(10L, countDeletedMusicsUser2);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
@@ -83,11 +83,11 @@ class RestoreDeletedMusicsTest extends BaseTdd {
             .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andReturn().getResponse();
 
-    Long countDeletedMusicsUser1 = musicRepository.countByUserAndDeleted(user1, false);
+    Long countMusicsUser1 = musicRepository.countByUserAndDeleted(user1, false);
     Long countDeletedMusicsUser2 = musicRepository.countByUserAndDeleted(user2, true);
 
     assertEquals("9", response.getContentAsString());
-    assertEquals(10L, countDeletedMusicsUser1);
+    assertEquals(10L, countMusicsUser1);
     assertEquals(10L, countDeletedMusicsUser2);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
@@ -122,11 +122,11 @@ class RestoreDeletedMusicsTest extends BaseTdd {
             .contentType(MediaType.APPLICATION_JSON).content(jsonRequest))
         .andReturn().getResponse();
 
-    Long countDeletedMusicsUser1 = musicRepository.countByUserAndDeleted(user1, false);
+    Long countMusicsUser1 = musicRepository.countByUserAndDeleted(user1, false);
     Long countDeletedMusicsUser2 = musicRepository.countByUserAndDeleted(user2, true);
 
     assertEquals("0", response.getContentAsString());
-    assertEquals(1L, countDeletedMusicsUser1);
+    assertEquals(1L, countMusicsUser1);
     assertEquals(10L, countDeletedMusicsUser2);
     assertEquals(HttpStatus.OK.value(), response.getStatus());
   }
