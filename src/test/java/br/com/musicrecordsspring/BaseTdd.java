@@ -155,16 +155,16 @@ public abstract class BaseTdd {
   }
 
   public boolean matchDate(String date) {
-    return Pattern.matches("\\d{4}-\\d{2}-\\d{2}", date);
+    return Pattern.matches("^\\d{4}-\\d{2}-\\d{2}$", date);
   }
 
 
   public boolean matchTime(String time) {
-    return Pattern.matches("\\d{2}:\\d{2}:\\d{2}", time);
+    return Pattern.matches("^\\d{2}:\\d{2}:\\d{2}$", time);
   }
 
 
   public boolean matchDateTime(String dateTime) {
-    return Pattern.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}", dateTime);
+    return Pattern.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", dateTime);
   }
 }
