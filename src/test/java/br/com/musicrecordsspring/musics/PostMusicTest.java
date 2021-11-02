@@ -1,6 +1,7 @@
 package br.com.musicrecordsspring.musics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -99,6 +100,7 @@ class PostMusicTest extends BaseTdd {
     assertTrue(validDuration);
     assertTrue(validNumberViews);
     assertTrue(validFeat);
+    assertFalse(dbMusic.isDeleted());
     assertNull(responseMap.get("deleted"));
     assertNull(responseMap.get("user"));
     assertTrue(matchDateTime(responseMap.get("created_at").toString()));
@@ -151,6 +153,7 @@ class PostMusicTest extends BaseTdd {
     assertTrue(validDuration);
     assertTrue(validNumberViews);
     assertTrue(validFeat);
+    assertFalse(dbMusic.isDeleted());
     assertNull(responseMap.get("deleted"));
     assertNull(responseMap.get("user"));
     assertTrue(matchDateTime(responseMap.get("created_at").toString()));

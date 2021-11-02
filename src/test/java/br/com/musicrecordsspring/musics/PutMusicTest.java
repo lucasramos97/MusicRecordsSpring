@@ -1,6 +1,7 @@
 package br.com.musicrecordsspring.musics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -116,6 +117,7 @@ class PutMusicTest extends BaseTdd {
     assertNotEquals(musicContentMap.get("number_views"), responseMap.get("number_views"));
     assertTrue(validFeat);
     assertNotEquals(musicContentMap.get("feat"), responseMap.get("feat"));
+    assertFalse(dbMusic.isDeleted());
     assertNull(responseMap.get("deleted"));
     assertNull(responseMap.get("user"));
     assertTrue(matchDateTime(responseMap.get("created_at").toString()));
@@ -179,6 +181,7 @@ class PutMusicTest extends BaseTdd {
     assertNotEquals(musicContentMap.get("duration"), responseMap.get("duration"));
     assertTrue(validNumberViews);
     assertTrue(validFeat);
+    assertFalse(dbMusic.isDeleted());
     assertNull(responseMap.get("deleted"));
     assertNull(responseMap.get("user"));
     assertTrue(matchDateTime(responseMap.get("created_at").toString()));
