@@ -14,6 +14,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import br.com.musicrecordsspring.utils.Messages;
 import lombok.Getter;
@@ -44,13 +45,13 @@ public class User implements Serializable {
   @Column(nullable = false)
   private String password;
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.S")
+  @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
   @JsonProperty("created_at")
   @Column(name = "created_at", nullable = false, updatable = false)
   @CreatedDate
   private Date createdAt;
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.S")
+  @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
   @JsonProperty("updated_at")
   @Column(name = "updated_at")
   @LastModifiedDate

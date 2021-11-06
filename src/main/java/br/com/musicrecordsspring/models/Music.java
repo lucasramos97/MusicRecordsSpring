@@ -20,6 +20,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.OptBoolean;
@@ -47,14 +48,14 @@ public class Music implements Serializable {
   @Column(nullable = false, length = 100)
   private String artist;
 
-  @JsonFormat(pattern = "yyyy-MM-dd", lenient = OptBoolean.FALSE)
+  @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd", lenient = OptBoolean.FALSE)
   @JsonProperty("release_date")
   @NotNull(message = Messages.RELEASE_DATE_IS_REQUIRED)
   @Temporal(TemporalType.DATE)
   @Column(name = "release_date", nullable = false)
   private Date releaseDate;
 
-  @JsonFormat(pattern = "HH:mm:ss", lenient = OptBoolean.FALSE)
+  @JsonFormat(shape = Shape.STRING, pattern = "HH:mm:ss", lenient = OptBoolean.FALSE)
   @NotNull(message = Messages.DURATION_IS_REQUIRED)
   @Temporal(TemporalType.TIME)
   @Column(nullable = false)
@@ -77,13 +78,13 @@ public class Music implements Serializable {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.S")
+  @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
   @JsonProperty("created_at")
   @Column(name = "created_at", nullable = false, updatable = false)
   @CreatedDate
   private Date createdAt;
 
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.S")
+  @JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS")
   @JsonProperty("updated_at")
   @Column(name = "updated_at")
   @LastModifiedDate
