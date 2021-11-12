@@ -33,7 +33,7 @@ public interface MusicRepository extends JpaRepository<Music, Long> {
 
   @Transactional
   @Modifying
-  @Query("UPDATE Music m SET m.deleted = false WHERE m.deleted = true AND m.id IN :ids AND m.user = :user")
+  @Query("UPDATE Music m SET m.deleted = false, m.updatedAt = CURRENT_TIMESTAMP WHERE m.deleted = true AND m.id IN :ids AND m.user = :user")
   public int restoreDeletedMusicsByUser(@Param("ids") List<Long> musicIds,
       @Param("user") User user);
 

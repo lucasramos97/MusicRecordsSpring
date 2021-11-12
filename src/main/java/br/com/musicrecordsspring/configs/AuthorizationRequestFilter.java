@@ -2,6 +2,8 @@ package br.com.musicrecordsspring.configs;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,9 +103,12 @@ public class AuthorizationRequestFilter extends OncePerRequestFilter {
     chain.doFilter(request, response);
   }
 
-  private boolean isNotNeedAuthorization(HttpServletRequest request) {
+  private boolean isNotNeedAuthorization(HttpServletRequest request) throws MalformedURLException {
+
+    URL url = new URL(request.getRequestURL().toString());
+
     return "POST".equals(request.getMethod())
-        && ("/login".equals(request.getPathInfo()) || "/users".equals(request.getPathInfo()));
+        && ("/login".equals(url.getPath()) || "/users".equals(url.getPath()));
   }
 
   private void sendUnauthorizedResponse(HttpServletResponse response, String message)

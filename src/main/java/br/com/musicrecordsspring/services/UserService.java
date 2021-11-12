@@ -26,15 +26,16 @@ public class UserService {
 
   public User createUser(User user) {
 
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    Optional<User> optionalUser = userRepository.findUserByEmail(user.getEmail());
 
-    try {
-
-      return userRepository.save(user);
-    } catch (DataIntegrityViolationException e) {
+    if (optionalUser.isPresent()) {
       throw new DataIntegrityViolationException(
           Messages.getEmailAlreadyRegistered(user.getEmail()));
     }
+
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+    return userRepository.save(user);
   }
 
   public Authenticable login(Login login) {
